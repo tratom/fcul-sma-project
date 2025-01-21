@@ -1,0 +1,202 @@
+Jan 21, 2025 9:43:10 PM jade.core.Runtime beginContainer
+INFO: ----------------------------------
+    This is JADE 4.6.0 - revision 6869 of 30-11-2022 14:47:03
+    downloaded in Open Source, under LGPL restrictions,
+    at http://jade.tilab.com/
+----------------------------------------
+Jan 21, 2025 9:43:10 PM jade.imtp.leap.LEAPIMTPManager initialize
+INFO: Listening for intra-platform commands on address:
+- jicp://172.100.10.1:1099
+
+Jan 21, 2025 9:43:10 PM jade.core.BaseService init
+INFO: Service jade.core.management.AgentManagement initialized
+Jan 21, 2025 9:43:10 PM jade.core.BaseService init
+INFO: Service jade.core.messaging.Messaging initialized
+Jan 21, 2025 9:43:10 PM jade.core.BaseService init
+INFO: Service jade.core.resource.ResourceManagement initialized
+Jan 21, 2025 9:43:10 PM jade.core.BaseService init
+INFO: Service jade.core.mobility.AgentMobility initialized
+Jan 21, 2025 9:43:10 PM jade.core.BaseService init
+INFO: Service jade.core.event.Notification initialized
+Jan 21, 2025 9:43:10 PM jade.mtp.http.HTTPServer <init>
+INFO: HTTP-MTP Using XML parser com.sun.org.apache.xerces.internal.jaxp.SAXParserImpl$JAXPSAXParser
+Jan 21, 2025 9:43:10 PM jade.core.messaging.MessagingService boot
+INFO: MTP addresses:
+http://sonny:7778/acc
+Jan 21, 2025 9:43:10 PM jade.core.AgentContainerImpl joinPlatform
+INFO: --------------------------------------
+Agent container Main-Container@172.100.10.1 is ready.
+--------------------------------------------
+player1 is starting. Registering as bazaar-player...
+player2 is starting. Registering as bazaar-player...
+gm starting as Bazaar Agent...
+
+=== Starting Round 1 ===
+>>> New player joined: player1 (score initialized to 0).
+>>> New player joined: player2 (score initialized to 0).
+gm: Sent 'round-start' message to players.
+player2 received 'round-start'. Re-discovering players and enabling negotiation...
+player1 received 'round-start'. Re-discovering players and enabling negotiation...
+player2 discovered 1 other player(s).
+gm: Announcing prices for Round 1 with event: No special event
+> Sent price announcement: Nutmeg=15;Clove=20;Cardamom=5;Cinnamon=10;|EVENT:No special event
+gm: Requesting sales from players...
+player1 discovered 1 other player(s).
+player2 received price-announcement:
+  Nutmeg=15;Clove=20;Cardamom=5;Cinnamon=10;|EVENT:No special event
+player1 received price-announcement:
+  Nutmeg=15;Clove=20;Cardamom=5;Cinnamon=10;|EVENT:No special event
+player1 received sell-request from gm
+player2 received sell-request from gm
+player1 -> player2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+player2 accepted trade with player1: OFFER:Cinnamon=2 -> REQUEST:Clove=1
+player2 -> sell-response: Nutmeg=1;Clove=1;Cardamom=0;Cinnamon=3
+player2 sold {Nutmeg=1, Clove=1, Cardamom=0, Cinnamon=3} -> earned 65 coins (total 65).
+player1 -> player2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+player1 -> player2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+player1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+player1 -> sell-response: Nutmeg=1;Clove=1;Cardamom=0;Cinnamon=2
+player1 sold {Nutmeg=1, Clove=1, Cardamom=0, Cinnamon=2} -> earned 55 coins (total 55).
+
+--- End of Round 1 ---
+Current Scoreboard:
+  player1 has 55 coins.
+  player2 has 65 coins.
+Adjusted prices for next round: {Nutmeg=15, Clove=20, Cardamom=7, Cinnamon=10}
+
+=== Starting Round 2 ===
+gm: Sent 'round-start' message to players.
+gm: Announcing prices for Round 2 with event: Sultan's Port Tax of 10% on sales this round
+player1 received 'round-start'. Re-discovering players and enabling negotiation...
+player2 received 'round-start'. Re-discovering players and enabling negotiation...
+> Sent price announcement: Nutmeg=15;Clove=20;Cardamom=7;Cinnamon=10;|EVENT:Sultan's Port Tax of 10% on sales this round
+gm: Requesting sales from players...
+player1 discovered 1 other player(s).
+player1 received price-announcement:
+  Nutmeg=15;Clove=20;Cardamom=7;Cinnamon=10;|EVENT:Sultan's Port Tax of 10% on sales this round
+player1 received sell-request from gm
+player2 discovered 1 other player(s).
+player2 received price-announcement:
+  Nutmeg=15;Clove=20;Cardamom=7;Cinnamon=10;|EVENT:Sultan's Port Tax of 10% on sales this round
+player2 received sell-request from gm
+player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 rejected trade from player2: OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player2 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+player2 -> sell-response: Nutmeg=0;Clove=0;Cardamom=0;Cinnamon=2
+  [Tax Applied] player2 paid 2 coins in taxes.
+player2 sold {Nutmeg=0, Clove=0, Cardamom=0, Cinnamon=2} -> earned 18 coins (total 83).
+player1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+player1 -> sell-response: Nutmeg=0;Clove=1;Cardamom=0;Cinnamon=1
+  [Tax Applied] player1 paid 3 coins in taxes.
+player1 sold {Nutmeg=0, Clove=1, Cardamom=0, Cinnamon=1} -> earned 27 coins (total 82).
+
+--- End of Round 2 ---
+Current Scoreboard:
+  player1 has 82 coins.
+  player2 has 83 coins.
+Adjusted prices for next round: {Nutmeg=17, Clove=20, Cardamom=9, Cinnamon=10}
+
+=== Starting Round 3 ===
+gm: Sent 'round-start' message to players.
+gm: Announcing prices for Round 3 with event: No special event
+player1 received 'round-start'. Re-discovering players and enabling negotiation...
+player2 received 'round-start'. Re-discovering players and enabling negotiation...
+> Sent price announcement: Nutmeg=17;Clove=20;Cardamom=9;Cinnamon=10;|EVENT:No special event
+gm: Requesting sales from players...
+player1 discovered 1 other player(s).
+player1 received price-announcement:
+  Nutmeg=17;Clove=20;Cardamom=9;Cinnamon=10;|EVENT:No special event
+player1 received sell-request from gm
+player2 discovered 1 other player(s).
+player2 received price-announcement:
+  Nutmeg=17;Clove=20;Cardamom=9;Cinnamon=10;|EVENT:No special event
+player2 received sell-request from gm
+player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 rejected trade from player2: OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player2 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+player2 -> sell-response: Nutmeg=0;Clove=0;Cardamom=0;Cinnamon=1
+player2 sold {Nutmeg=0, Clove=0, Cardamom=0, Cinnamon=1} -> earned 10 coins (total 93).
+player1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+player1 -> sell-response: Nutmeg=0;Clove=0;Cardamom=0;Cinnamon=1
+player1 sold {Nutmeg=0, Clove=0, Cardamom=0, Cinnamon=1} -> earned 10 coins (total 92).
+
+--- End of Round 3 ---
+Current Scoreboard:
+  player1 has 92 coins.
+  player2 has 93 coins.
+Adjusted prices for next round: {Nutmeg=19, Clove=22, Cardamom=11, Cinnamon=10}
+
+=== Starting Round 4 ===
+gm: Sent 'round-start' message to players.
+player2 received 'round-start'. Re-discovering players and enabling negotiation...
+player1 received 'round-start'. Re-discovering players and enabling negotiation...
+gm: Announcing prices for Round 4 with event: Storm in Indian Ocean: Next round Cardamom price +5
+> Sent price announcement: Nutmeg=19;Clove=22;Cardamom=11;Cinnamon=10;|EVENT:Storm in Indian Ocean: Next round Cardamom price +5
+gm: Requesting sales from players...
+player1 discovered 1 other player(s).
+player1 received price-announcement:
+  Nutmeg=19;Clove=22;Cardamom=11;Cinnamon=10;|EVENT:Storm in Indian Ocean: Next round Cardamom price +5
+player1 received sell-request from gm
+player2 discovered 1 other player(s).
+player2 received price-announcement:
+  Nutmeg=19;Clove=22;Cardamom=11;Cinnamon=10;|EVENT:Storm in Indian Ocean: Next round Cardamom price +5
+player2 received sell-request from gm
+player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 accepted trade with player2: OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 -> sell-response: Nutmeg=0;Clove=0;Cardamom=3;Cinnamon=0
+player1 sold {Nutmeg=0, Clove=0, Cardamom=3, Cinnamon=0} -> earned 33 coins (total 125).
+player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player2 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+player2 -> sell-response: Nutmeg=0;Clove=0;Cardamom=2;Cinnamon=0
+player2 sold {Nutmeg=0, Clove=0, Cardamom=2, Cinnamon=0} -> earned 22 coins (total 115).
+
+--- End of Round 4 ---
+Current Scoreboard:
+  player1 has 125 coins.
+  player2 has 115 coins.
+Adjusted prices for next round: {Nutmeg=21, Clove=24, Cardamom=16, Cinnamon=12}
+
+=== Starting Round 5 ===
+gm: Sent 'round-start' message to players.
+gm: Announcing prices for Round 5 with event: No special event
+player1 received 'round-start'. Re-discovering players and enabling negotiation...
+player2 received 'round-start'. Re-discovering players and enabling negotiation...
+> Sent price announcement: Nutmeg=21;Clove=24;Cardamom=16;Cinnamon=12;|EVENT:No special event
+gm: Requesting sales from players...
+player1 discovered 1 other player(s).
+player1 received price-announcement:
+  Nutmeg=21;Clove=24;Cardamom=16;Cinnamon=12;|EVENT:No special event
+player1 received sell-request from gm
+player2 discovered 1 other player(s).
+player2 received price-announcement:
+  Nutmeg=21;Clove=24;Cardamom=16;Cinnamon=12;|EVENT:No special event
+player2 received sell-request from gm
+player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player2 accepted trade with player1: OFFER:Cardamom=2 -> REQUEST:Clove=1
+player2 -> sell-response: Nutmeg=0;Clove=0;Cardamom=2;Cinnamon=0
+player2 sold {Nutmeg=0, Clove=0, Cardamom=2, Cinnamon=0} -> earned 32 coins (total 147).
+player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+player1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+player1 -> sell-response: Nutmeg=0;Clove=0;Cardamom=1;Cinnamon=0
+player1 sold {Nutmeg=0, Clove=0, Cardamom=1, Cinnamon=0} -> earned 16 coins (total 141).
+
+--- End of Round 5 ---
+Current Scoreboard:
+  player1 has 141 coins.
+  player2 has 147 coins.
+Adjusted prices for next round: {Nutmeg=23, Clove=26, Cardamom=16, Cinnamon=14}
+Reached MAX_ROUNDS. Terminating...
+gm terminating.
+
