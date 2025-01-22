@@ -17,9 +17,12 @@ import java.util.*;
  * It announces market prices/events, collects sales from PlayerAgents,
  * updates the scoreboard, and manages rounds.
  *
- * Now:
- *  - MAX_ROUNDS is taken from agent's startup arguments.
- *  - A "game-over" message is sent to all active players upon termination.
+ * Changes from previous version:
+ *  - Storm, Sultan Tax, and New Trade Route amounts are randomly generated.
+ *  - The event states these random values explicitly (so players see them).
+ *  - The effect of Storm / New Trade Route is applied to prices in the *next* round.
+ *  - Sultan's Port Tax is applied in the *current* round's sales, but the random
+ *    percentage is announced at round start.
  */
 public class BazaarAgent extends Agent {
 
@@ -40,22 +43,23 @@ public class BazaarAgent extends Agent {
 
     // Round management
     private int currentRound = 1;
-    private int maxRounds = 5;   // Will be overridden by arguments if provided
+    private int maxRounds = 5; // Overridden if arguments passed in
 
-    // Track the current round’s event so that price changes or taxes can be applied
+    // The event string for the current round
+    // e.g. "Storm: Next round Nutmeg +7" or "Sultan's Port Tax of 15%..." or "New Trade Route: next round factor=0.4"
     private String currentEvent = "No special event";
 
-    // Percentage (0 to 100) tax if the event is "Sultan’s Port Tax"
+    // Percentage tax if the event is "Sultan’s Port Tax" (applies this round only)
     private double sultansTaxRate = 0.0;
 
-    // Store total sales per spice each round to do supply/demand logic
+    // Store total sales per spice each round (for supply/demand logic)
     private Map<String, Integer> roundSpiceSales;
 
     @Override
     protected void setup() {
         System.out.println(getLocalName() + " starting as Bazaar Agent...");
 
-        // === 1) Read startup arguments for maxRounds (if provided) ===
+        // 1) Check for a custom maxRounds argument
         Object[] args = getArguments();
         if (args != null && args.length > 0) {
             try {
@@ -67,7 +71,7 @@ public class BazaarAgent extends Agent {
             }
         }
 
-        // 2) Register in the Directory Facilitator (DF) as the bazaar-master
+        // 2) Register in the Directory Facilitator (DF)
         registerService("bazaar-master");
 
         // 3) Initialize default prices
@@ -76,13 +80,10 @@ public class BazaarAgent extends Agent {
         currentPrices.put(NUTMEG,   15);
         currentPrices.put(CARDAMOM,  5);
 
-        // 4) Add the main behaviour to handle the entire game
+        // 4) Add the main behaviour to handle all rounds
         addBehaviour(new RoundManagerBehaviour(this));
     }
 
-    /**
-     * Helper method to register a service with the JADE DF.
-     */
     private void registerService(String serviceName) {
         try {
             DFAgentDescription dfd = new DFAgentDescription();
@@ -97,16 +98,10 @@ public class BazaarAgent extends Agent {
         }
     }
 
-    // ------------------------------------------------
-    //  Round Manager
-    // ------------------------------------------------
-
-    /**
-     * Main behaviour that progresses the game through multiple rounds.
-     * Uses a SequentialBehaviour that resets each round until reaching maxRounds.
-     */
+    // -----------------------------------------------------------------
+    //  Main Round Management
+    // -----------------------------------------------------------------
     private class RoundManagerBehaviour extends SequentialBehaviour {
-
         public RoundManagerBehaviour(Agent a) {
             super(a);
         }
@@ -115,22 +110,12 @@ public class BazaarAgent extends Agent {
         public void onStart() {
             System.out.println("\n=== Starting Round " + currentRound + " ===");
 
-            // ** 0) Update the list of active players before sub-behaviours
+            // Sub-behaviours in order:
             addSubBehaviour(new UpdatePlayerListBehaviour());
-
-            // ** 1) Announce round begin
             addSubBehaviour(new AnnounceRoundStartBehaviour());
-
-            // ** 2) Announce prices and events
             addSubBehaviour(new AnnouncePricesBehaviour());
-
-            // ** 3) Request sales
             addSubBehaviour(new RequestSalesBehaviour());
-
-            // ** 4) Collect sales
             addSubBehaviour(new CollectSalesBehaviour());
-
-            // ** 5) End round (scoreboard + next round adjustments)
             addSubBehaviour(new EndRoundBehaviour());
         }
 
@@ -138,33 +123,27 @@ public class BazaarAgent extends Agent {
         public int onEnd() {
             if (currentRound < maxRounds) {
                 currentRound++;
-                reset(); // Reset the sub-behaviours for the next round
-                myAgent.addBehaviour(new RoundManagerBehaviour(myAgent)); // Re-schedule itself
+                reset(); 
+                myAgent.addBehaviour(new RoundManagerBehaviour(myAgent)); // schedule next round
                 return 0;
             } else {
-                // === We have reached or exceeded the total number of rounds ===
                 System.out.println("Reached MAX_ROUNDS = " + maxRounds + ". Ending game...");
-                // ** Send 'game-over' message to all active players **
                 sendGameOverToPlayers();
-
-                // Terminate the agent
                 myAgent.doDelete();
                 return super.onEnd();
             }
         }
     }
 
-    // ------------------------------------------------
-    //  Sub-Behaviours for each step
-    // ------------------------------------------------
-
+    // -----------------------------------------------------------------
+    //  Sub-Behaviours for each round step
+    // -----------------------------------------------------------------
     /**
-     * 0) Update the scoreboard with newly joined / departed players by DF lookup.
+     * 0) Update scoreboard with new/left players from DF
      */
     private class UpdatePlayerListBehaviour extends OneShotBehaviour {
         @Override
         public void action() {
-            // Look up all "zanzibar-player" services
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
             sd.setType("zanzibar-player");
@@ -173,35 +152,34 @@ public class BazaarAgent extends Agent {
             try {
                 DFAgentDescription[] results = DFService.search(myAgent, template);
 
-                // Build a set of current DF player names
+                // Build set of current DF player names
                 Set<String> dfPlayers = new HashSet<>();
                 for (DFAgentDescription dfd : results) {
                     dfPlayers.add(dfd.getName().getLocalName());
                 }
 
-                // 1) Add new players that are not in scoreboard
+                // Add new players not in scoreboard or departed
                 for (String dfPlayerName : dfPlayers) {
                     if (!scoreboard.containsKey(dfPlayerName) &&
                         !departedPlayers.containsKey(dfPlayerName)) {
                         scoreboard.put(dfPlayerName, 0);
-                        System.out.println(">>> New player joined: " + dfPlayerName + " (score initialized to 0).");
+                        System.out.println(">>> New player joined: " + dfPlayerName + " (score=0).");
                     }
                 }
 
-                // 2) Detect players that have left (in scoreboard but not in DF search)
+                // Detect who left
                 List<String> toRemove = new ArrayList<>();
                 for (String playerName : scoreboard.keySet()) {
                     if (!dfPlayers.contains(playerName)) {
                         toRemove.add(playerName);
                     }
                 }
-                for (String leavingPlayer : toRemove) {
-                    int finalScore = scoreboard.get(leavingPlayer);
-                    scoreboard.remove(leavingPlayer);
-                    departedPlayers.put(leavingPlayer, finalScore);
-                    System.out.println(">>> Player " + leavingPlayer + " left. Final score saved: " + finalScore);
+                for (String leaving : toRemove) {
+                    int finalScore = scoreboard.get(leaving);
+                    scoreboard.remove(leaving);
+                    departedPlayers.put(leaving, finalScore);
+                    System.out.println(">>> Player " + leaving + " left. Final score: " + finalScore);
                 }
-
             } catch (FIPAException fe) {
                 fe.printStackTrace();
             }
@@ -209,13 +187,12 @@ public class BazaarAgent extends Agent {
     }
 
     /**
-     * 1) Announce the begin of a new round.
+     * 1) Announce new round
      */
     private class AnnounceRoundStartBehaviour extends OneShotBehaviour {
         @Override
         public void action() {
             if (scoreboard.isEmpty()) {
-                // If there are no active players, no need to broadcast
                 System.out.println(getLocalName() + ": No active players for 'round-start'.");
                 return;
             }
@@ -227,29 +204,29 @@ public class BazaarAgent extends Agent {
             for (String playerName : scoreboard.keySet()) {
                 startMsg.addReceiver(getAID(playerName));
             }
+            send(startMsg);
 
-            myAgent.send(startMsg);
-            System.out.println(getLocalName() + ": Sent 'round-start' message to players.");
+            System.out.println(getLocalName() + ": Sent 'round-start' to players.");
         }
     }
 
     /**
-     * 2) Announce current prices and randomly chosen event to all active players.
+     * 2) Announce prices + event (with random effect). 
+     *    Storm / Sultan's Tax / New Route / or No event.
      */
     private class AnnouncePricesBehaviour extends OneShotBehaviour {
         @Override
         public void action() {
             if (scoreboard.isEmpty()) {
-                System.out.println(getLocalName() + ": No active players to announce to.");
+                System.out.println(getLocalName() + ": No players to announce prices.");
                 return;
             }
 
-            // Generate or choose an event for this round
-            currentEvent = generateEvent();
-            System.out.println(getLocalName() + ": Announcing prices for Round " + currentRound
-                               + " with event: " + currentEvent);
+            currentEvent = generateEvent();  
+            System.out.println(getLocalName() + ": Announcing event for Round " + currentRound
+                               + " => " + currentEvent);
 
-            // Broadcast a message with the updated prices & event
+            // Build message with current prices + event
             ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
             msg.setConversationId("price-announcement");
             msg.setContent(encodePriceEventInfo(currentPrices, currentEvent));
@@ -259,12 +236,12 @@ public class BazaarAgent extends Agent {
             }
             send(msg);
 
-            System.out.println("> Sent price announcement: " + msg.getContent());
+            System.out.println("> Sent price-announcement: " + msg.getContent());
         }
     }
 
     /**
-     * 3) Request that players submit how many units they will sell this round.
+     * 3) Request sales from each player
      */
     private class RequestSalesBehaviour extends OneShotBehaviour {
         @Override
@@ -273,28 +250,27 @@ public class BazaarAgent extends Agent {
                 System.out.println(getLocalName() + ": No active players to request sales from.");
                 return;
             }
+            System.out.println(getLocalName() + ": Requesting sales...");
 
-            System.out.println(getLocalName() + ": Requesting sales from players...");
-
-            ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.setConversationId("sell-request");
-            msg.setContent("How many units of each spice will you sell this round? (format: Spice=Qty;...)");
+            ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
+            req.setConversationId("sell-request");
+            req.setContent("How many units of each spice will you sell this round? (Spice=Qty;...)");
 
             for (String playerName : scoreboard.keySet()) {
-                msg.addReceiver(getAID(playerName));
+                req.addReceiver(getAID(playerName));
             }
-            send(msg);
+            send(req);
         }
     }
 
     /**
-     * 4) Collect the sales. Track total sales to apply supply/demand logic.
+     * 4) Collect sales
      */
     private class CollectSalesBehaviour extends Behaviour {
-        private int repliesReceived = 0;
-        private boolean done = false;
+        private int replies = 0;
+        private boolean doneFlag = false;
 
-        // Reset round sales to zero for each spice
+        // Reset round sales to zero
         public CollectSalesBehaviour() {
             roundSpiceSales = new HashMap<>();
             roundSpiceSales.put(CLOVE,     0);
@@ -305,91 +281,84 @@ public class BazaarAgent extends Agent {
 
         @Override
         public void action() {
-            // Listen for "sell-response" messages
             MessageTemplate mt = MessageTemplate.MatchConversationId("sell-response");
             ACLMessage reply = myAgent.receive(mt);
-
             if (reply != null) {
                 String playerName = reply.getSender().getLocalName();
-
-                // Parse the player's response: e.g. "Clove=2;Cinnamon=0;Nutmeg=1;Cardamom=3"
                 Map<String, Integer> soldMap = decodeSellInfo(reply.getContent());
 
-                // Calculate coins gained (minus possible tax if event is Sultan’s Port Tax)
+                // Calculate coins
                 int coinsGained = 0;
                 for (Map.Entry<String, Integer> e : soldMap.entrySet()) {
                     String spice = e.getKey();
-                    int quantity = e.getValue();
+                    int qty = e.getValue();
                     int price = currentPrices.getOrDefault(spice, 0);
 
-                    coinsGained += price * quantity;
+                    coinsGained += price * qty;
+
                     // Tally for supply/demand
-                    roundSpiceSales.put(spice, roundSpiceSales.get(spice) + quantity);
+                    roundSpiceSales.put(spice, roundSpiceSales.get(spice) + qty);
                 }
 
-                // If we have a tax event, reduce coins by that percentage
+                // If we had a Sultan's Tax this round, apply it
                 if (currentEvent.startsWith("Sultan's Port Tax")) {
-                    int taxedAmount = (int) Math.round(coinsGained * sultansTaxRate);
-                    coinsGained -= taxedAmount;
-                    System.out.println("  [Tax Applied] " + playerName + " paid " + taxedAmount + " coins in taxes.");
+                    // e.g. "Sultan's Port Tax of 12% on sales this round"
+                    int tax = (int)Math.round(coinsGained * sultansTaxRate);
+                    coinsGained -= tax;
+                    System.out.println("  [Tax] " + playerName + " pays " + tax + " coins in taxes.");
                 }
 
                 // Update scoreboard
                 int oldScore = scoreboard.getOrDefault(playerName, 0);
                 scoreboard.put(playerName, oldScore + coinsGained);
+                replies++;
 
-                repliesReceived++;
-                System.out.println(playerName + " sold " + soldMap
-                        + " -> earned " + coinsGained + " coins (total " + scoreboard.get(playerName) + ").");
+                System.out.println(playerName + " sold " + soldMap + " => " + coinsGained
+                        + " coins (total " + scoreboard.get(playerName) + ")");
             } else {
-                block(); // wait for next message
+                block();
             }
 
-            // If we've received all replies (assuming scoreboard size is # of active players)
-            if (repliesReceived >= scoreboard.size()) {
-                done = true;
+            if (replies >= scoreboard.size()) {
+                doneFlag = true;
             }
         }
 
         @Override
         public boolean done() {
-            return done;
+            return doneFlag;
         }
     }
 
     /**
-     * 5) EndRoundBehaviour:
-     *    - Print scoreboard
-     *    - Adjust prices according to event and supply/demand
+     * 5) End Round: show scoreboard, apply supply/demand + event effect for next round
      */
     private class EndRoundBehaviour extends OneShotBehaviour {
         @Override
         public void action() {
             System.out.println("\n--- End of Round " + currentRound + " ---");
             if (scoreboard.isEmpty()) {
-                System.out.println("No active players this round.");
+                System.out.println("No players this round.");
             } else {
-                System.out.println("Current Scoreboard:");
-                for (Map.Entry<String, Integer> entry : scoreboard.entrySet()) {
-                    System.out.println("  " + entry.getKey() + " has " + entry.getValue() + " coins.");
+                System.out.println("Scoreboard:");
+                for (Map.Entry<String, Integer> e : scoreboard.entrySet()) {
+                    System.out.println("  " + e.getKey() + ": " + e.getValue());
                 }
             }
 
-            // Adjust next round's prices (apply event effects + supply/demand)
             adjustPricesForNextRound();
 
-            // Reset any event-specific data
+            // Reset tax each round
             sultansTaxRate = 0.0;
         }
     }
 
-    // ------------------------------------------------
-    //  Utility / Helper Methods
-    // ------------------------------------------------
+    // -----------------------------------------------------------------
+    //  Utility Methods
+    // -----------------------------------------------------------------
 
     /**
-     *  Send a "game-over" message to all currently tracked players.
-     *  This will let them know the game has ended, so they can terminate.
+     * Send 'game-over' to all active players so they can terminate themselves.
      */
     private void sendGameOverToPlayers() {
         if (scoreboard.isEmpty()) {
@@ -397,47 +366,149 @@ public class BazaarAgent extends Agent {
         }
         ACLMessage gameOverMsg = new ACLMessage(ACLMessage.INFORM);
         gameOverMsg.setConversationId("game-over");
-        gameOverMsg.setContent("The bazaar game has ended. Thank you for playing!");
+        gameOverMsg.setContent("The bazaar game has ended. Goodbye!");
         for (String playerName : scoreboard.keySet()) {
             gameOverMsg.addReceiver(getAID(playerName));
         }
         send(gameOverMsg);
-        System.out.println(getLocalName() + ": Sent 'game-over' message to players.");
+        System.out.println(getLocalName() + ": Sent 'game-over' to remaining players.");
     }
 
     /**
-     * Randomly pick one of the bazaar events.
+     * Generate a random event. The actual price/tax changes are
+     * applied in the next round (except the tax is for this round's sales).
      */
     private String generateEvent() {
         double r = Math.random();
-        if (r < 0.25) {
+        Random rng = new Random();
+        if (r < 0.33) {
             // Storm
-            String spiceAffected = pickRandomSpice();
-            return "Storm in Indian Ocean: Next round " + spiceAffected + " price +5";
-        } else if (r < 0.50) {
-            // Sultan's tax
-            sultansTaxRate = 0.10;
-            return "Sultan's Port Tax of 10% on sales this round";
-        } else if (r < 0.75) {
+            // Pick spice
+            String spice = pickRandomSpice();
+            // Random +X from e.g. 2..8
+            int stormAmount = 2 + rng.nextInt(7); // [2..8]
+            return "Storm in Indian Ocean: Next round " + spice + " price +" + stormAmount;
+        }
+        else if (r < 0.66) {
+            // Sultan's Port Tax
+            // random percent 5..20
+            int taxPercent = 5 + rng.nextInt(16); // [5..20]
+            sultansTaxRate = taxPercent / 100.0;  // e.g. 0.12
+            return "Sultan's Port Tax of " + taxPercent + "% on sales this round";
+        }
+        else {
             // New Trade Route
-            String spiceAffected = pickRandomSpice();
-            return "New Trade Route Discovered: " + spiceAffected + " price drastically drops next round";
-        } else {
-            return "No special event";
+            String spice = pickRandomSpice();
+            // random factor 0.3..0.7
+            double factor = 0.3 + (0.4 * rng.nextDouble()); // [0.3..0.7]
+            // Round to two decimals
+            double f2 = Math.round(factor * 100.0) / 100.0;
+            return "New Trade Route Discovered: " + spice + " next round price x" + f2;
         }
     }
 
-    /**
-     * Utility to pick a random spice name from known spices.
-     */
     private String pickRandomSpice() {
-        List<String> spices = new ArrayList<>(Arrays.asList(CLOVE, CINNAMON, NUTMEG, CARDAMOM));
+        List<String> spices = Arrays.asList(CLOVE, CINNAMON, NUTMEG, CARDAMOM);
         Collections.shuffle(spices);
         return spices.get(0);
     }
 
     /**
-     * Encode market prices and event into a single string.
+     * After the round ends, update prices for next round based on:
+     *  - Supply/demand
+     *  - Storm or new trade route effect from the event text
+     */
+    private void adjustPricesForNextRound() {
+        // parse if there's a Storm or a New Trade Route
+        // We'll look for the strings we used:
+        // Storm: "Storm in Indian Ocean: Next round <spice> price +X"
+        // Route: "New Trade Route Discovered: <spice> next round price xFactor"
+        
+        // 1) supply/demand
+        for (String spice : currentPrices.keySet()) {
+            int oldPrice = currentPrices.get(spice);
+            int newPrice = oldPrice;
+
+            int soldQty = (roundSpiceSales != null) ? roundSpiceSales.get(spice) : 0;
+            // if a lot sold => price down a bit
+            if (soldQty > 10) {
+                newPrice -= 2;
+            }
+            // if none sold => price up a bit
+            else if (soldQty == 0) {
+                newPrice += 2;
+            }
+
+            // keep 1 as minimum
+            if (newPrice < 1) newPrice = 1;
+            currentPrices.put(spice, newPrice);
+        }
+
+        // 2) event effect
+        // STORM
+        if (currentEvent.startsWith("Storm in Indian Ocean:")) {
+            // e.g. "Storm in Indian Ocean: Next round Nutmeg price +7"
+            // parse out the spice and the +X
+            try {
+                // find "Next round "
+                int idx = currentEvent.indexOf("Next round ");
+                if (idx != -1) {
+                    String part = currentEvent.substring(idx + 11).trim(); // e.g. "Nutmeg price +7"
+                    String[] tokens = part.split(" "); 
+                    // tokens[0] = "Nutmeg"
+                    // tokens[1] = "price"
+                    // tokens[2] = "+7"
+                    String spiceImpacted = tokens[0];
+                    int plusAmount = 0;
+                    if (tokens.length >= 3 && tokens[2].startsWith("+")) {
+                        plusAmount = Integer.parseInt(tokens[2].replace("+", ""));
+                    }
+                    // apply
+                    int oldPrice = currentPrices.getOrDefault(spiceImpacted, 1);
+                    int newPrice = oldPrice + plusAmount;
+                    if (newPrice < 1) newPrice = 1;
+                    currentPrices.put(spiceImpacted, newPrice);
+                }
+            } catch (Exception ex) {
+                System.err.println("Error parsing storm event: " + ex);
+            }
+        }
+        // NEW TRADE ROUTE
+        else if (currentEvent.startsWith("New Trade Route Discovered:")) {
+            // e.g. "New Trade Route Discovered: Clove next round price x0.45"
+            try {
+                int idx = currentEvent.indexOf(":");
+                if (idx != -1) {
+                    // "Clove next round price x0.45"
+                    String part = currentEvent.substring(idx + 1).trim();
+                    // split => "Clove", "next", "round", "price", "x0.45"
+                    String[] tokens = part.split(" ");
+                    if (tokens.length >= 5) {
+                        String spiceImpacted = tokens[0];
+                        String factorToken = tokens[4]; // "x0.45"
+                        double factor = 1.0;
+                        if (factorToken.startsWith("x")) {
+                            factor = Double.parseDouble(factorToken.replace("x", ""));
+                        }
+                        // apply
+                        int oldPrice = currentPrices.getOrDefault(spiceImpacted, 1);
+                        // multiply
+                        double newP = oldPrice * factor;
+                        int finalPrice = (int)Math.round(newP);
+                        if (finalPrice < 1) finalPrice = 1;
+                        currentPrices.put(spiceImpacted, finalPrice);
+                    }
+                }
+            } catch (Exception ex) {
+                System.err.println("Error parsing new trade route event: " + ex);
+            }
+        }
+
+        System.out.println("Prices after Round " + currentRound + " adjustments: " + currentPrices);
+    }
+
+    /**
+     * Encode prices + event in a single string
      */
     private String encodePriceEventInfo(Map<String, Integer> prices, String eventMsg) {
         StringBuilder sb = new StringBuilder();
@@ -449,81 +520,27 @@ public class BazaarAgent extends Agent {
     }
 
     /**
-     * Decode a player's sell info of the form "Clove=2;Cinnamon=1;..."
+     * Decode player's sell info: "Clove=2;Cinnamon=0;..."
      */
     private Map<String, Integer> decodeSellInfo(String content) {
-        Map<String, Integer> soldMap = new HashMap<>();
+        Map<String, Integer> sold = new HashMap<>();
         try {
             String[] parts = content.split(";");
             for (String p : parts) {
                 String[] kv = p.split("=");
                 if (kv.length == 2) {
-                    soldMap.put(kv[0].trim(), Integer.parseInt(kv[1].trim()));
+                    sold.put(kv[0].trim(), Integer.parseInt(kv[1].trim()));
                 }
             }
         } catch (Exception e) {
             System.err.println("Error parsing sell info: " + content);
         }
-        return soldMap;
-    }
-
-    /**
-     * Adjust prices for the next round, applying the event effect and a simple supply/demand rule.
-     */
-    private void adjustPricesForNextRound() {
-        String spiceImpacted = null;
-        boolean stormHappened = false;
-        boolean routeHappened = false;
-
-        if (currentEvent.startsWith("Storm in Indian Ocean")) {
-            stormHappened = true;
-            int idx = currentEvent.indexOf("Next round ");
-            if (idx != -1) {
-                String part = currentEvent.substring(idx + 11).trim(); // e.g. "Clove price +5"
-                spiceImpacted = part.split(" ")[0];
-            }
-        }
-        else if (currentEvent.startsWith("New Trade Route Discovered")) {
-            routeHappened = true;
-            int idx = currentEvent.indexOf(":");
-            if (idx != -1) {
-                String part = currentEvent.substring(idx + 1).trim(); // e.g. "Nutmeg price drastically drops next round"
-                spiceImpacted = part.split(" ")[0];
-            }
-        }
-
-        for (String spice : currentPrices.keySet()) {
-            int oldPrice = currentPrices.get(spice);
-            int newPrice = oldPrice;
-
-            // supply/demand example
-            int totalSold = roundSpiceSales != null ? roundSpiceSales.get(spice) : 0;
-            if (totalSold > 10) {
-                newPrice -= 2;
-            } else if (totalSold == 0) {
-                newPrice += 2;
-            }
-
-            // event effect
-            if (stormHappened && spice.equals(spiceImpacted)) {
-                newPrice += 5;
-            }
-            if (routeHappened && spice.equals(spiceImpacted)) {
-                newPrice = Math.max(1, newPrice / 2);
-            }
-
-            if (newPrice < 1) {
-                newPrice = 1;
-            }
-            currentPrices.put(spice, newPrice);
-        }
-
-        System.out.println("Adjusted prices for next round: " + currentPrices);
+        return sold;
     }
 
     @Override
     protected void takeDown() {
-        // Deregister from DF
+        // Deregister
         try {
             DFService.deregister(this);
         } catch (FIPAException fe) {
