@@ -152,16 +152,20 @@ public class PlayerAgent extends Agent {
 
                         // Reset the negotiation state for the new round
                         negotiationAttempts = 0;
-                        negotiationOpen = true;  // allow negotiation attempts
                         break;
 
                     case "price-announcement":
                         handlePriceAnnouncement(msg);
+                        negotiationOpen = true;  // allow negotiation attempts
                         break;
 
                     case "sell-request":
                         handleSellRequest(msg);
                         break;
+                        
+                    case "game-over":
+                    	handleGameOver(msg);
+                    	break;
 
                     default:
                         block();
@@ -249,7 +253,7 @@ public class PlayerAgent extends Agent {
                     Map<String, Integer> offered = new HashMap<>();
                     Map<String, Integer> requested = new HashMap<>();
 
-                    parseTradeProposal(msg.getContent(), offered, requested);
+                    decodeTradeProposal(msg.getContent(), offered, requested);
 
                     // Check if the trade is acceptable to us
                     if (isTradeAcceptable(offered, requested, msg.getSender())) {
@@ -342,9 +346,19 @@ public class PlayerAgent extends Agent {
     // ---------------------------------------------------------------------
     //  Handlers for GM messages
     // ---------------------------------------------------------------------
+    private void handleGameOver(ACLMessage msg) {
+        System.out.println("\n" + getLocalName() + " received 'game-over' from " 
+                           + msg.getSender().getLocalName()
+                           + " with content: " + msg.getContent());
+        // Perform any final cleanup or stats saving here if needed.
+
+        // Terminate this agent
+        doDelete();
+    }
+    
     private void handlePriceAnnouncement(ACLMessage msg) {
         System.out.println(getLocalName() + " received price-announcement:\n  " + msg.getContent());
-        parsePriceEventInfo(msg.getContent());
+        decodePriceEventInfo(msg.getContent());
     }
 
     private void handleSellRequest(ACLMessage msg) {
@@ -581,7 +595,7 @@ public class PlayerAgent extends Agent {
         return sb.toString();
     }
 
-    private void parseTradeProposal(String content, Map<String, Integer> offered, Map<String, Integer> requested) {
+    private void decodeTradeProposal(String content, Map<String, Integer> offered, Map<String, Integer> requested) {
         // e.g. "OFFER:Cardamom=2;Cinnamon=1 -> REQUEST:Clove=1;Nutmeg=1"
         try {
             String[] parts = content.split("->");
@@ -621,7 +635,7 @@ public class PlayerAgent extends Agent {
         return sb.toString();
     }
 
-    private void parsePriceEventInfo(String content) {
+    private void decodePriceEventInfo(String content) {
         // e.g. "Clove=20;Cinnamon=10;Nutmeg=15;Cardamom=5|EVENT:Storm..."
         String[] mainParts = content.split("\\|EVENT:");
         if (mainParts.length > 0) {

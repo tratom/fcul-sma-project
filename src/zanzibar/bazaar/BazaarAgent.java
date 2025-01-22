@@ -1,7 +1,9 @@
 package zanzibar.bazaar;
 
 import jade.core.Agent;
-import jade.core.behaviours.*;
+import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.*;
 import jade.domain.FIPAException;
@@ -15,10 +17,9 @@ import java.util.*;
  * It announces market prices/events, collects sales from PlayerAgents,
  * updates the scoreboard, and manages rounds.
  *
- * Adapted to:
- *  - Dynamically track players joining/leaving each round
- *  - Introduce events from "Bazaar Specific Rules"
- *  - Adjust prices based on events and supply/demand
+ * Now:
+ *  - MAX_ROUNDS is taken from agent's startup arguments.
+ *  - A "game-over" message is sent to all active players upon termination.
  */
 public class BazaarAgent extends Agent {
 
@@ -39,7 +40,7 @@ public class BazaarAgent extends Agent {
 
     // Round management
     private int currentRound = 1;
-    private static final int MAX_ROUNDS = 5; // Adjust as needed
+    private int maxRounds = 5;   // Will be overridden by arguments if provided
 
     // Track the current round’s event so that price changes or taxes can be applied
     private String currentEvent = "No special event";
@@ -54,16 +55,28 @@ public class BazaarAgent extends Agent {
     protected void setup() {
         System.out.println(getLocalName() + " starting as Bazaar Agent...");
 
-        // 1. Register in the Directory Facilitator (DF) as the bazaar-master
+        // === 1) Read startup arguments for maxRounds (if provided) ===
+        Object[] args = getArguments();
+        if (args != null && args.length > 0) {
+            try {
+                maxRounds = Integer.parseInt(args[0].toString());
+                System.out.println(getLocalName() + ": MAX_ROUNDS set to " + maxRounds
+                                   + " from startup arguments.");
+            } catch (NumberFormatException e) {
+                System.out.println(getLocalName() + ": Invalid argument for maxRounds, using default of 5.");
+            }
+        }
+
+        // 2) Register in the Directory Facilitator (DF) as the bazaar-master
         registerService("bazaar-master");
 
-        // 2. Initialize default prices
+        // 3) Initialize default prices
         currentPrices.put(CLOVE,    20);
         currentPrices.put(CINNAMON, 10);
         currentPrices.put(NUTMEG,   15);
         currentPrices.put(CARDAMOM,  5);
 
-        // 3. Add the main behaviour to handle the entire game
+        // 4) Add the main behaviour to handle the entire game
         addBehaviour(new RoundManagerBehaviour(this));
     }
 
@@ -90,7 +103,7 @@ public class BazaarAgent extends Agent {
 
     /**
      * Main behaviour that progresses the game through multiple rounds.
-     * Uses a SequentialBehaviour that resets each round until reaching MAX_ROUNDS.
+     * Uses a SequentialBehaviour that resets each round until reaching maxRounds.
      */
     private class RoundManagerBehaviour extends SequentialBehaviour {
 
@@ -107,7 +120,7 @@ public class BazaarAgent extends Agent {
 
             // ** 1) Announce round begin
             addSubBehaviour(new AnnounceRoundStartBehaviour());
-            
+
             // ** 2) Announce prices and events
             addSubBehaviour(new AnnouncePricesBehaviour());
 
@@ -123,13 +136,18 @@ public class BazaarAgent extends Agent {
 
         @Override
         public int onEnd() {
-            if (currentRound < MAX_ROUNDS) {
+            if (currentRound < maxRounds) {
                 currentRound++;
                 reset(); // Reset the sub-behaviours for the next round
                 myAgent.addBehaviour(new RoundManagerBehaviour(myAgent)); // Re-schedule itself
                 return 0;
             } else {
-                System.out.println("Reached MAX_ROUNDS. Terminating...");
+                // === We have reached or exceeded the total number of rounds ===
+                System.out.println("Reached MAX_ROUNDS = " + maxRounds + ". Ending game...");
+                // ** Send 'game-over' message to all active players **
+                sendGameOverToPlayers();
+
+                // Terminate the agent
                 myAgent.doDelete();
                 return super.onEnd();
             }
@@ -139,7 +157,7 @@ public class BazaarAgent extends Agent {
     // ------------------------------------------------
     //  Sub-Behaviours for each step
     // ------------------------------------------------
-    
+
     /**
      * 0) Update the scoreboard with newly joined / departed players by DF lookup.
      */
@@ -189,10 +207,9 @@ public class BazaarAgent extends Agent {
             }
         }
     }
-    
+
     /**
      * 1) Announce the begin of a new round.
-     * This way, all active players get a clear signal that negotiation for the new round is open.
      */
     private class AnnounceRoundStartBehaviour extends OneShotBehaviour {
         @Override
@@ -205,7 +222,6 @@ public class BazaarAgent extends Agent {
 
             ACLMessage startMsg = new ACLMessage(ACLMessage.INFORM);
             startMsg.setConversationId("round-start");
-            // You can include any text you like to signal to players
             startMsg.setContent("Round " + currentRound + " has started. Prepare to negotiate!");
 
             for (String playerName : scoreboard.keySet()) {
@@ -224,7 +240,7 @@ public class BazaarAgent extends Agent {
         @Override
         public void action() {
             if (scoreboard.isEmpty()) {
-                System.out.println(getLocalName() + ": No active players to announce to (scoreboard is empty).");
+                System.out.println(getLocalName() + ": No active players to announce to.");
                 return;
             }
 
@@ -294,25 +310,24 @@ public class BazaarAgent extends Agent {
             ACLMessage reply = myAgent.receive(mt);
 
             if (reply != null) {
+                String playerName = reply.getSender().getLocalName();
+
                 // Parse the player's response: e.g. "Clove=2;Cinnamon=0;Nutmeg=1;Cardamom=3"
                 Map<String, Integer> soldMap = decodeSellInfo(reply.getContent());
 
                 // Calculate coins gained (minus possible tax if event is Sultan’s Port Tax)
-                String playerName = reply.getSender().getLocalName();
                 int coinsGained = 0;
-
                 for (Map.Entry<String, Integer> e : soldMap.entrySet()) {
                     String spice = e.getKey();
                     int quantity = e.getValue();
                     int price = currentPrices.getOrDefault(spice, 0);
 
                     coinsGained += price * quantity;
-
                     // Tally for supply/demand
                     roundSpiceSales.put(spice, roundSpiceSales.get(spice) + quantity);
                 }
 
-                // If we have a tax event, reduce coins gained by that percentage
+                // If we have a tax event, reduce coins by that percentage
                 if (currentEvent.startsWith("Sultan's Port Tax")) {
                     int taxedAmount = (int) Math.round(coinsGained * sultansTaxRate);
                     coinsGained -= taxedAmount;
@@ -346,7 +361,6 @@ public class BazaarAgent extends Agent {
      * 5) EndRoundBehaviour:
      *    - Print scoreboard
      *    - Adjust prices according to event and supply/demand
-     *    - Next round or end
      */
     private class EndRoundBehaviour extends OneShotBehaviour {
         @Override
@@ -364,7 +378,7 @@ public class BazaarAgent extends Agent {
             // Adjust next round's prices (apply event effects + supply/demand)
             adjustPricesForNextRound();
 
-            // Reset any event-specific data, like sultansTaxRate
+            // Reset any event-specific data
             sultansTaxRate = 0.0;
         }
     }
@@ -374,26 +388,38 @@ public class BazaarAgent extends Agent {
     // ------------------------------------------------
 
     /**
-     *  Randomly pick one of the bazaar events:
-     *   - Storm in the Indian Ocean => next round price up for some spice
-     *   - Sultan's Port Tax => apply tax to all sales
-     *   - New Trade Route => drastically reduce one spice's price
-     *   - Or no event
+     *  Send a "game-over" message to all currently tracked players.
+     *  This will let them know the game has ended, so they can terminate.
+     */
+    private void sendGameOverToPlayers() {
+        if (scoreboard.isEmpty()) {
+            return;
+        }
+        ACLMessage gameOverMsg = new ACLMessage(ACLMessage.INFORM);
+        gameOverMsg.setConversationId("game-over");
+        gameOverMsg.setContent("The bazaar game has ended. Thank you for playing!");
+        for (String playerName : scoreboard.keySet()) {
+            gameOverMsg.addReceiver(getAID(playerName));
+        }
+        send(gameOverMsg);
+        System.out.println(getLocalName() + ": Sent 'game-over' message to players.");
+    }
+
+    /**
+     * Randomly pick one of the bazaar events.
      */
     private String generateEvent() {
         double r = Math.random();
         if (r < 0.25) {
             // Storm
-            // We can randomly pick a spice to be “disrupted”
             String spiceAffected = pickRandomSpice();
             return "Storm in Indian Ocean: Next round " + spiceAffected + " price +5";
         } else if (r < 0.50) {
             // Sultan's tax
-            // Let’s define a flat 10% tax for illustration
-            sultansTaxRate = 0.10; 
+            sultansTaxRate = 0.10;
             return "Sultan's Port Tax of 10% on sales this round";
         } else if (r < 0.75) {
-            // New Trade Route discovered: pick a spice that drops drastically
+            // New Trade Route
             String spiceAffected = pickRandomSpice();
             return "New Trade Route Discovered: " + spiceAffected + " price drastically drops next round";
         } else {
@@ -411,8 +437,7 @@ public class BazaarAgent extends Agent {
     }
 
     /**
-     * Encode market prices and event into a single string (e.g. "Clove=20;Cinnamon=10;...|EVENT:Storm...").
-     * You could use JSON or other structured format in practice.
+     * Encode market prices and event into a single string.
      */
     private String encodePriceEventInfo(Map<String, Integer> prices, String eventMsg) {
         StringBuilder sb = new StringBuilder();
@@ -424,7 +449,7 @@ public class BazaarAgent extends Agent {
     }
 
     /**
-     * Decode a player's sell info of the form "Clove=2;Cinnamon=1;Nutmeg=0..."
+     * Decode a player's sell info of the form "Clove=2;Cinnamon=1;..."
      */
     private Map<String, Integer> decodeSellInfo(String content) {
         Map<String, Integer> soldMap = new HashMap<>();
@@ -443,21 +468,15 @@ public class BazaarAgent extends Agent {
     }
 
     /**
-     * Adjust prices for the next round, applying:
-     *   - The event effect
-     *   - A simple supply/demand rule based on how much was sold
+     * Adjust prices for the next round, applying the event effect and a simple supply/demand rule.
      */
     private void adjustPricesForNextRound() {
-        // 1) Check if the event from this round modifies next round's prices
         String spiceImpacted = null;
         boolean stormHappened = false;
         boolean routeHappened = false;
 
         if (currentEvent.startsWith("Storm in Indian Ocean")) {
             stormHappened = true;
-            // e.g. "Storm in Indian Ocean: Next round Clove price +5"
-            // parse out which spice got impacted
-            // (the simplest approach: substring after "Next round")
             int idx = currentEvent.indexOf("Next round ");
             if (idx != -1) {
                 String part = currentEvent.substring(idx + 11).trim(); // e.g. "Clove price +5"
@@ -466,7 +485,6 @@ public class BazaarAgent extends Agent {
         }
         else if (currentEvent.startsWith("New Trade Route Discovered")) {
             routeHappened = true;
-            // e.g. "New Trade Route Discovered: Nutmeg price drastically drops next round"
             int idx = currentEvent.indexOf(":");
             if (idx != -1) {
                 String part = currentEvent.substring(idx + 1).trim(); // e.g. "Nutmeg price drastically drops next round"
@@ -478,31 +496,25 @@ public class BazaarAgent extends Agent {
             int oldPrice = currentPrices.get(spice);
             int newPrice = oldPrice;
 
-            // 2) Apply supply/demand
-            // If a lot of this spice was sold => supply is high => price goes down
-            // If little was sold => supply is low => price goes up
+            // supply/demand example
             int totalSold = roundSpiceSales != null ? roundSpiceSales.get(spice) : 0;
-            // Example thresholds: if totalSold > 10, price -2; if totalSold=0, price +2
             if (totalSold > 10) {
-                newPrice -= 2; 
+                newPrice -= 2;
             } else if (totalSold == 0) {
                 newPrice += 2;
             }
 
-            // 3) Apply the event effect (Storm => +5, New Trade Route => large drop)
+            // event effect
             if (stormHappened && spice.equals(spiceImpacted)) {
-                newPrice += 5; 
+                newPrice += 5;
             }
             if (routeHappened && spice.equals(spiceImpacted)) {
-                // Drastic drop, e.g. -50% or minimum 1 coin
-                newPrice = Math.max(1, newPrice / 2); 
+                newPrice = Math.max(1, newPrice / 2);
             }
 
-            // Random floor at 1
             if (newPrice < 1) {
                 newPrice = 1;
             }
-
             currentPrices.put(spice, newPrice);
         }
 
@@ -511,7 +523,7 @@ public class BazaarAgent extends Agent {
 
     @Override
     protected void takeDown() {
-        // Deregister from the DF
+        // Deregister from DF
         try {
             DFService.deregister(this);
         } catch (FIPAException fe) {
