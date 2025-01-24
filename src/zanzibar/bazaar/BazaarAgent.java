@@ -74,11 +74,12 @@ public class BazaarAgent extends Agent {
         // 2) Register in the Directory Facilitator (DF)
         registerService("bazaar-master");
 
-        // 3) Initialize default prices
-        currentPrices.put(CLOVE,    20);
-        currentPrices.put(CINNAMON, 10);
-        currentPrices.put(NUTMEG,   15);
-        currentPrices.put(CARDAMOM,  5);
+        // 3) Initialize random prices
+        Random rand = new Random();
+        currentPrices.put(CLOVE,    15 + rand.nextInt(30));  // The most valuable and rare of spices, difficult to obtain.
+        currentPrices.put(CINNAMON,  1 + rand.nextInt(10)); // Common, but essential to maintain a steady stream of profits.
+        currentPrices.put(NUTMEG,   10 + rand.nextInt(25)); // Highly valued, especially with the arrival of new European merchants.
+        currentPrices.put(CARDAMOM,  1 + rand.nextInt(10)); // A basic product, but subject to price fluctuations due to its variable demand.
 
         // 4) Add the main behaviour to handle all rounds
         addBehaviour(new RoundManagerBehaviour(this));
@@ -341,9 +342,12 @@ public class BazaarAgent extends Agent {
                 System.out.println("No players this round.");
             } else {
                 System.out.println("Scoreboard:");
-                for (Map.Entry<String, Integer> e : scoreboard.entrySet()) {
-                    System.out.println("  " + e.getKey() + ": " + e.getValue());
-                }
+
+                // Sort the scoreboard by value (descending order)
+                scoreboard.entrySet()
+                    .stream()
+                    .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue())) // Sort descending
+                    .forEach(e -> System.out.println("  " + e.getKey() + ": " + e.getValue()));
             }
 
             adjustPricesForNextRound();
@@ -546,6 +550,6 @@ public class BazaarAgent extends Agent {
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
-        System.out.println(getLocalName() + " terminating.");
+        System.out.println(getLocalName() + " is terminating.");
     }
 }
