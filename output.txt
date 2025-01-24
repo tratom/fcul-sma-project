@@ -1,202 +1,603 @@
-Jan 21, 2025 9:43:10 PM jade.core.Runtime beginContainer
+Jan 24, 2025 11:03:58 PM jade.core.Runtime beginContainer
 INFO: ----------------------------------
     This is JADE 4.6.0 - revision 6869 of 30-11-2022 14:47:03
     downloaded in Open Source, under LGPL restrictions,
     at http://jade.tilab.com/
 ----------------------------------------
-Jan 21, 2025 9:43:10 PM jade.imtp.leap.LEAPIMTPManager initialize
+Jan 24, 2025 11:03:58 PM jade.imtp.leap.LEAPIMTPManager initialize
 INFO: Listening for intra-platform commands on address:
 - jicp://172.100.10.1:1099
 
-Jan 21, 2025 9:43:10 PM jade.core.BaseService init
+Jan 24, 2025 11:03:58 PM jade.core.BaseService init
 INFO: Service jade.core.management.AgentManagement initialized
-Jan 21, 2025 9:43:10 PM jade.core.BaseService init
+Jan 24, 2025 11:03:58 PM jade.core.BaseService init
 INFO: Service jade.core.messaging.Messaging initialized
-Jan 21, 2025 9:43:10 PM jade.core.BaseService init
+Jan 24, 2025 11:03:58 PM jade.core.BaseService init
 INFO: Service jade.core.resource.ResourceManagement initialized
-Jan 21, 2025 9:43:10 PM jade.core.BaseService init
+Jan 24, 2025 11:03:58 PM jade.core.BaseService init
 INFO: Service jade.core.mobility.AgentMobility initialized
-Jan 21, 2025 9:43:10 PM jade.core.BaseService init
+Jan 24, 2025 11:03:58 PM jade.core.BaseService init
 INFO: Service jade.core.event.Notification initialized
-Jan 21, 2025 9:43:10 PM jade.mtp.http.HTTPServer <init>
+Jan 24, 2025 11:03:58 PM jade.mtp.http.HTTPServer <init>
 INFO: HTTP-MTP Using XML parser com.sun.org.apache.xerces.internal.jaxp.SAXParserImpl$JAXPSAXParser
-Jan 21, 2025 9:43:10 PM jade.core.messaging.MessagingService boot
+Jan 24, 2025 11:03:58 PM jade.core.messaging.MessagingService boot
 INFO: MTP addresses:
 http://sonny:7778/acc
-Jan 21, 2025 9:43:10 PM jade.core.AgentContainerImpl joinPlatform
+Jan 24, 2025 11:03:58 PM jade.core.AgentContainerImpl joinPlatform
 INFO: --------------------------------------
 Agent container Main-Container@172.100.10.1 is ready.
 --------------------------------------------
-player1 is starting. Registering as bazaar-player...
-player2 is starting. Registering as bazaar-player...
-gm starting as Bazaar Agent...
+Merchant_1 initializing...
+Merchant_1: Delaying start by 30 seconds...
+Merchant_2 initializing...
+Merchant_2: Delaying start by 30 seconds...
+Merchant_3 initializing...
+Merchant_3: Delaying start by 30 seconds...
+Merchant_4 initializing...
+Merchant_4: Delaying start by 30 seconds...
+Merchant_5 initializing...
+Merchant_5: Delaying start by 30 seconds...
+Merchant_1 is starting. Registering as zanzibar-player...
+Merchant_1 setup complete:
+Merchant_1 - initial inventory: {Nutmeg=9, Clove=3, Cardamom=25, Cinnamon=19}
+Bazaar initializing...
+Bazaar: Delaying start by 30 seconds...
+Merchant_2 is starting. Registering as zanzibar-player...
+Merchant_2 setup complete:
+Merchant_2 - initial inventory: {Nutmeg=5, Clove=2, Cardamom=16, Cinnamon=23}
+Merchant_3 is starting. Registering as zanzibar-player...
+Merchant_3 setup complete:
+Merchant_3 - initial inventory: {Nutmeg=9, Clove=3, Cardamom=13, Cinnamon=21}
+Merchant_4 is starting. Registering as zanzibar-player...
+Merchant_4 setup complete:
+Merchant_4 - initial inventory: {Nutmeg=9, Clove=1, Cardamom=15, Cinnamon=26}
+Merchant_5 is starting. Registering as zanzibar-player...
+Merchant_5 setup complete:
+Merchant_5 - initial inventory: {Nutmeg=6, Clove=3, Cardamom=9, Cinnamon=16}
+Bazaar starting as Bazaar Agent...
 
 === Starting Round 1 ===
->>> New player joined: player1 (score initialized to 0).
->>> New player joined: player2 (score initialized to 0).
-gm: Sent 'round-start' message to players.
-player2 received 'round-start'. Re-discovering players and enabling negotiation...
-player1 received 'round-start'. Re-discovering players and enabling negotiation...
-player2 discovered 1 other player(s).
-gm: Announcing prices for Round 1 with event: No special event
-> Sent price announcement: Nutmeg=15;Clove=20;Cardamom=5;Cinnamon=10;|EVENT:No special event
-gm: Requesting sales from players...
-player1 discovered 1 other player(s).
-player2 received price-announcement:
-  Nutmeg=15;Clove=20;Cardamom=5;Cinnamon=10;|EVENT:No special event
-player1 received price-announcement:
-  Nutmeg=15;Clove=20;Cardamom=5;Cinnamon=10;|EVENT:No special event
-player1 received sell-request from gm
-player2 received sell-request from gm
-player1 -> player2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
-player2 accepted trade with player1: OFFER:Cinnamon=2 -> REQUEST:Clove=1
-player2 -> sell-response: Nutmeg=1;Clove=1;Cardamom=0;Cinnamon=3
-player2 sold {Nutmeg=1, Clove=1, Cardamom=0, Cinnamon=3} -> earned 65 coins (total 65).
-player1 -> player2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
-player1 -> player2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
-player1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
-player1 -> sell-response: Nutmeg=1;Clove=1;Cardamom=0;Cinnamon=2
-player1 sold {Nutmeg=1, Clove=1, Cardamom=0, Cinnamon=2} -> earned 55 coins (total 55).
+>>> New player joined: Merchant_1 (score=0).
+>>> New player joined: Merchant_2 (score=0).
+>>> New player joined: Merchant_3 (score=0).
+>>> New player joined: Merchant_4 (score=0).
+>>> New player joined: Merchant_5 (score=0).
+Bazaar: Sent 'round-start' to players.
+Merchant_1 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_5 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_2 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_4 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_3 received 'round-start'. Re-discovering players and enabling negotiation...
+Bazaar: Announcing event for Round 1 => New Trade Route Discovered: Clove next round price x0.55
+Merchant_1 discovered 4 other player(s).
+Merchant_5 discovered 4 other player(s).
+> Sent price-announcement: Nutmeg=31;Clove=40;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.55
+Merchant_1 received price-announcement:
+  Nutmeg=31;Clove=40;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.55
+Bazaar: Requesting sales...
+Merchant_1: My naive forecast for next-round prices => {Nutmeg=31, Clove=22, Cardamom=10, Cinnamon=5}
+Merchant_2 discovered 4 other player(s).
+Merchant_1 received sell-request from Bazaar
+Merchant_2 received price-announcement:
+  Nutmeg=31;Clove=40;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.55
+Merchant_4 discovered 4 other player(s).
+Merchant_2: My naive forecast for next-round prices => {Nutmeg=31, Clove=22, Cardamom=10, Cinnamon=5}
+Merchant_5 received price-announcement:
+  Nutmeg=31;Clove=40;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.55
+Merchant_2 received sell-request from Bazaar
+Merchant_5: My naive forecast for next-round prices => {Nutmeg=31, Clove=22, Cardamom=10, Cinnamon=5}
+Merchant_3 discovered 4 other player(s).
+Merchant_3 received price-announcement:
+  Nutmeg=31;Clove=40;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.55
+Merchant_3: My naive forecast for next-round prices => {Nutmeg=31, Clove=22, Cardamom=10, Cinnamon=5}
+Merchant_3 received sell-request from Bazaar
+Merchant_5 received sell-request from Bazaar
+Merchant_4 received price-announcement:
+  Nutmeg=31;Clove=40;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.55
+Merchant_4: My naive forecast for next-round prices => {Nutmeg=31, Clove=22, Cardamom=10, Cinnamon=5}
+Merchant_4 received sell-request from Bazaar
+Merchant_2 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_5 proposed an alliance to Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 proposed an alliance to Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 evaluating alliance proposal from Merchant_5: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_2 rejected an alliance with Merchant_5
+Merchant_4 rejected trade from Merchant_5: OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_3 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_4 -> Merchant_3: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_3 rejected trade from Merchant_4: OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_1 -> Merchant_2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+Merchant_2 rejected trade from Merchant_1: OFFER:Cardamom=2 -> REQUEST:Clove=1
+Merchant_2 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_5 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_3 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_4 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_1 -> Merchant_2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+Merchant_2 proposed an alliance to Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 proposed an alliance to Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 evaluating alliance proposal from Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 rejected an alliance with Merchant_2
+Merchant_2 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_5 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_3 -> Merchant_2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_4 proposed an alliance to Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Clove=1
+Merchant_1 -> Merchant_5: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
+Merchant_2 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_2 -> sell-response: Nutmeg=1;Clove=2;Cardamom=1;Cinnamon=1
+Merchant_2 inventory update: {Nutmeg=4, Clove=0, Cardamom=15, Cinnamon=22}
+Merchant_2 sold {Nutmeg=1, Clove=2, Cardamom=1, Cinnamon=1} => 126 coins (total 126)
+Merchant_5 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_5 -> sell-response: Nutmeg=1;Clove=3;Cardamom=1;Cinnamon=1
+Merchant_5 inventory update: {Nutmeg=5, Clove=0, Cardamom=8, Cinnamon=15}
+Merchant_5 sold {Nutmeg=1, Clove=3, Cardamom=1, Cinnamon=1} => 166 coins (total 166)
+Merchant_3 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_3 -> sell-response: Nutmeg=1;Clove=3;Cardamom=1;Cinnamon=1
+Merchant_3 inventory update: {Nutmeg=8, Clove=0, Cardamom=12, Cinnamon=20}
+Merchant_3 sold {Nutmeg=1, Clove=3, Cardamom=1, Cinnamon=1} => 166 coins (total 166)
+Merchant_4 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_4 -> sell-response: Nutmeg=1;Clove=1;Cardamom=1;Cinnamon=1
+Merchant_4 inventory update: {Nutmeg=8, Clove=0, Cardamom=14, Cinnamon=25}
+Merchant_4 sold {Nutmeg=1, Clove=1, Cardamom=1, Cinnamon=1} => 86 coins (total 86)
+Merchant_1 proposed an alliance to Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 proposed an alliance to Merchant_5: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 evaluating alliance proposal from Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 formed an alliance with Merchant_1
+Merchant_1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_1 -> sell-response: Nutmeg=1;Clove=3;Cardamom=1;Cinnamon=1
+Merchant_1 inventory update: {Nutmeg=8, Clove=0, Cardamom=24, Cinnamon=18}
+Merchant_1 sold {Nutmeg=1, Clove=3, Cardamom=1, Cinnamon=1} => 166 coins (total 166)
 
 --- End of Round 1 ---
-Current Scoreboard:
-  player1 has 55 coins.
-  player2 has 65 coins.
-Adjusted prices for next round: {Nutmeg=15, Clove=20, Cardamom=7, Cinnamon=10}
+Scoreboard:
+  Merchant_1: 166
+  Merchant_3: 166
+  Merchant_5: 166
+  Merchant_2: 126
+  Merchant_4: 86
+Prices after Round 1 adjustments: {Nutmeg=31, Clove=21, Cardamom=10, Cinnamon=5}
 
 === Starting Round 2 ===
-gm: Sent 'round-start' message to players.
-gm: Announcing prices for Round 2 with event: Sultan's Port Tax of 10% on sales this round
-player1 received 'round-start'. Re-discovering players and enabling negotiation...
-player2 received 'round-start'. Re-discovering players and enabling negotiation...
-> Sent price announcement: Nutmeg=15;Clove=20;Cardamom=7;Cinnamon=10;|EVENT:Sultan's Port Tax of 10% on sales this round
-gm: Requesting sales from players...
-player1 discovered 1 other player(s).
-player1 received price-announcement:
-  Nutmeg=15;Clove=20;Cardamom=7;Cinnamon=10;|EVENT:Sultan's Port Tax of 10% on sales this round
-player1 received sell-request from gm
-player2 discovered 1 other player(s).
-player2 received price-announcement:
-  Nutmeg=15;Clove=20;Cardamom=7;Cinnamon=10;|EVENT:Sultan's Port Tax of 10% on sales this round
-player2 received sell-request from gm
-player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 rejected trade from player2: OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player2 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
-player2 -> sell-response: Nutmeg=0;Clove=0;Cardamom=0;Cinnamon=2
-  [Tax Applied] player2 paid 2 coins in taxes.
-player2 sold {Nutmeg=0, Clove=0, Cardamom=0, Cinnamon=2} -> earned 18 coins (total 83).
-player1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
-player1 -> sell-response: Nutmeg=0;Clove=1;Cardamom=0;Cinnamon=1
-  [Tax Applied] player1 paid 3 coins in taxes.
-player1 sold {Nutmeg=0, Clove=1, Cardamom=0, Cinnamon=1} -> earned 27 coins (total 82).
+Bazaar: Sent 'round-start' to players.
+Bazaar: Announcing event for Round 2 => Sultan's Port Tax of 9% on sales this round
+> Sent price-announcement: Nutmeg=31;Clove=21;Cardamom=10;Cinnamon=5;|EVENT:Sultan's Port Tax of 9% on sales this round
+Merchant_2 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_5 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_3 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_4 received 'round-start'. Re-discovering players and enabling negotiation...
+Bazaar: Requesting sales...
+Merchant_1 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_2 discovered 4 other player(s).
+Merchant_1 discovered 4 other player(s).
+Merchant_5 discovered 4 other player(s).
+Merchant_4 discovered 4 other player(s).
+Merchant_2 received price-announcement:
+  Nutmeg=31;Clove=21;Cardamom=10;Cinnamon=5;|EVENT:Sultan's Port Tax of 9% on sales this round
+Merchant_2: My naive forecast for next-round prices => {Nutmeg=31, Clove=12, Cardamom=10, Cinnamon=5}
+Merchant_5 received price-announcement:
+  Nutmeg=31;Clove=21;Cardamom=10;Cinnamon=5;|EVENT:Sultan's Port Tax of 9% on sales this round
+Merchant_3 discovered 4 other player(s).
+Merchant_2 received sell-request from Bazaar
+Merchant_4 received price-announcement:
+  Nutmeg=31;Clove=21;Cardamom=10;Cinnamon=5;|EVENT:Sultan's Port Tax of 9% on sales this round
+Merchant_4: My naive forecast for next-round prices => {Nutmeg=31, Clove=12, Cardamom=10, Cinnamon=5}
+Merchant_5: My naive forecast for next-round prices => {Nutmeg=31, Clove=12, Cardamom=10, Cinnamon=5}
+Merchant_3 received price-announcement:
+  Nutmeg=31;Clove=21;Cardamom=10;Cinnamon=5;|EVENT:Sultan's Port Tax of 9% on sales this round
+Merchant_4 received sell-request from Bazaar
+Merchant_3: My naive forecast for next-round prices => {Nutmeg=31, Clove=12, Cardamom=10, Cinnamon=5}
+Merchant_1 received price-announcement:
+  Nutmeg=31;Clove=21;Cardamom=10;Cinnamon=5;|EVENT:Sultan's Port Tax of 9% on sales this round
+Merchant_1: My naive forecast for next-round prices => {Nutmeg=31, Clove=12, Cardamom=10, Cinnamon=5}
+Merchant_5 received sell-request from Bazaar
+Merchant_3 received sell-request from Bazaar
+Merchant_1 received sell-request from Bazaar
+Merchant_2 -> Merchant_3: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 rejected trade from Merchant_2: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 rejected trade from Merchant_5: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 proposed an alliance to Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_3 proposed an alliance to Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_3 proposed an alliance to Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 evaluating alliance proposal from Merchant_3: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_3 proposed an alliance to Merchant_5: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 rejected an alliance with Merchant_3
+Merchant_2 evaluating alliance proposal from Merchant_3: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 formed an alliance with Merchant_3
+Merchant_5 evaluating alliance proposal from Merchant_3: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 rejected an alliance with Merchant_3
+Merchant_4 evaluating alliance proposal from Merchant_3: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 formed an alliance with Merchant_3
+Merchant_3 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 -> Merchant_3: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 rejected trade from Merchant_4: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 -> Merchant_3: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_3 rejected trade from Merchant_1: OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 -> Merchant_3: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 proposed an alliance to Merchant_3: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 -> Merchant_2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 -> Merchant_4: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 -> Merchant_3: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 -> Merchant_2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 -> Merchant_2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 proposed an alliance to Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 proposed an alliance to Merchant_5: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_2 -> sell-response: Nutmeg=1;Clove=0;Cardamom=1;Cinnamon=1
+Merchant_2 inventory update: {Nutmeg=3, Clove=0, Cardamom=14, Cinnamon=21}
+  [Tax] Merchant_2 pays 4 coins in taxes.
+Merchant_2 sold {Nutmeg=1, Clove=0, Cardamom=1, Cinnamon=1} => 42 coins (total 168)
+Merchant_5 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_5 -> sell-response: Nutmeg=1;Clove=0;Cardamom=1;Cinnamon=1
+Merchant_5 inventory update: {Nutmeg=4, Clove=0, Cardamom=7, Cinnamon=14}
+  [Tax] Merchant_5 pays 4 coins in taxes.
+Merchant_5 sold {Nutmeg=1, Clove=0, Cardamom=1, Cinnamon=1} => 42 coins (total 208)
+Merchant_3 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_3 -> sell-response: Nutmeg=1;Clove=0;Cardamom=1;Cinnamon=1
+Merchant_3 inventory update: {Nutmeg=7, Clove=0, Cardamom=11, Cinnamon=19}
+  [Tax] Merchant_3 pays 4 coins in taxes.
+Merchant_3 sold {Nutmeg=1, Clove=0, Cardamom=1, Cinnamon=1} => 42 coins (total 208)
+Merchant_4 proposed an alliance to Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 proposed an alliance to Merchant_5: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_4 -> sell-response: Nutmeg=1;Clove=0;Cardamom=1;Cinnamon=1
+Merchant_4 inventory update: {Nutmeg=7, Clove=0, Cardamom=13, Cinnamon=24}
+  [Tax] Merchant_4 pays 4 coins in taxes.
+Merchant_4 sold {Nutmeg=1, Clove=0, Cardamom=1, Cinnamon=1} => 42 coins (total 128)
+Merchant_1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_1 -> sell-response: Nutmeg=1;Clove=0;Cardamom=1;Cinnamon=1
+Merchant_1 inventory update: {Nutmeg=7, Clove=0, Cardamom=23, Cinnamon=17}
+  [Tax] Merchant_1 pays 4 coins in taxes.
+Merchant_1 sold {Nutmeg=1, Clove=0, Cardamom=1, Cinnamon=1} => 42 coins (total 208)
 
 --- End of Round 2 ---
-Current Scoreboard:
-  player1 has 82 coins.
-  player2 has 83 coins.
-Adjusted prices for next round: {Nutmeg=17, Clove=20, Cardamom=9, Cinnamon=10}
+Scoreboard:
+  Merchant_1: 208
+  Merchant_3: 208
+  Merchant_5: 208
+  Merchant_2: 168
+  Merchant_4: 128
+Prices after Round 2 adjustments: {Nutmeg=31, Clove=23, Cardamom=10, Cinnamon=5}
 
 === Starting Round 3 ===
-gm: Sent 'round-start' message to players.
-gm: Announcing prices for Round 3 with event: No special event
-player1 received 'round-start'. Re-discovering players and enabling negotiation...
-player2 received 'round-start'. Re-discovering players and enabling negotiation...
-> Sent price announcement: Nutmeg=17;Clove=20;Cardamom=9;Cinnamon=10;|EVENT:No special event
-gm: Requesting sales from players...
-player1 discovered 1 other player(s).
-player1 received price-announcement:
-  Nutmeg=17;Clove=20;Cardamom=9;Cinnamon=10;|EVENT:No special event
-player1 received sell-request from gm
-player2 discovered 1 other player(s).
-player2 received price-announcement:
-  Nutmeg=17;Clove=20;Cardamom=9;Cinnamon=10;|EVENT:No special event
-player2 received sell-request from gm
-player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 rejected trade from player2: OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player2 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
-player2 -> sell-response: Nutmeg=0;Clove=0;Cardamom=0;Cinnamon=1
-player2 sold {Nutmeg=0, Clove=0, Cardamom=0, Cinnamon=1} -> earned 10 coins (total 93).
-player1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
-player1 -> sell-response: Nutmeg=0;Clove=0;Cardamom=0;Cinnamon=1
-player1 sold {Nutmeg=0, Clove=0, Cardamom=0, Cinnamon=1} -> earned 10 coins (total 92).
+Bazaar: Sent 'round-start' to players.
+Merchant_1 received 'round-start'. Re-discovering players and enabling negotiation...
+Bazaar: Announcing event for Round 3 => New Trade Route Discovered: Clove next round price x0.57
+Merchant_5 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_2 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_4 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_3 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_1 discovered 4 other player(s).
+Merchant_1 received price-announcement:
+  Nutmeg=31;Clove=23;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.57
+Merchant_1: My naive forecast for next-round prices => {Nutmeg=31, Clove=13, Cardamom=10, Cinnamon=5}
+> Sent price-announcement: Nutmeg=31;Clove=23;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.57
+Bazaar: Requesting sales...
+Merchant_5 discovered 4 other player(s).
+Merchant_2 discovered 4 other player(s).
+Merchant_1 received sell-request from Bazaar
+Merchant_5 received price-announcement:
+  Nutmeg=31;Clove=23;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.57
+Merchant_5: My naive forecast for next-round prices => {Nutmeg=31, Clove=13, Cardamom=10, Cinnamon=5}
+Merchant_2 received price-announcement:
+  Nutmeg=31;Clove=23;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.57
+Merchant_2: My naive forecast for next-round prices => {Nutmeg=31, Clove=13, Cardamom=10, Cinnamon=5}
+Merchant_5 received sell-request from Bazaar
+Merchant_2 received sell-request from Bazaar
+Merchant_4 discovered 4 other player(s).
+Merchant_3 discovered 4 other player(s).
+Merchant_3 received price-announcement:
+  Nutmeg=31;Clove=23;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.57
+Merchant_3: My naive forecast for next-round prices => {Nutmeg=31, Clove=13, Cardamom=10, Cinnamon=5}
+Merchant_3 received sell-request from Bazaar
+Merchant_4 received price-announcement:
+  Nutmeg=31;Clove=23;Cardamom=10;Cinnamon=5;|EVENT:New Trade Route Discovered: Clove next round price x0.57
+Merchant_4: My naive forecast for next-round prices => {Nutmeg=31, Clove=13, Cardamom=10, Cinnamon=5}
+Merchant_4 received sell-request from Bazaar
+Merchant_2 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 rejected trade from Merchant_2: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 rejected trade from Merchant_5: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 -> Merchant_2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 proposed an alliance to Merchant_5: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 evaluating alliance proposal from Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 rejected an alliance with Merchant_1
+Merchant_1 -> Merchant_3: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_3 rejected trade from Merchant_1: OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 -> Merchant_2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 proposed an alliance to Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 evaluating alliance proposal from Merchant_3: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 rejected an alliance with Merchant_3
+Merchant_3 -> Merchant_2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 -> Merchant_2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 proposed an alliance to Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 proposed an alliance to Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 evaluating alliance proposal from Merchant_5: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 formed an alliance with Merchant_5
+Merchant_5 -> Merchant_2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 -> Merchant_2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_2 -> sell-response: Nutmeg=1;Clove=0;Cardamom=1;Cinnamon=1
+Merchant_2 inventory update: {Nutmeg=2, Clove=0, Cardamom=13, Cinnamon=20}
+Merchant_2 sold {Nutmeg=1, Clove=0, Cardamom=1, Cinnamon=1} => 46 coins (total 214)
+Merchant_5 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_5 -> sell-response: Nutmeg=1;Clove=0;Cardamom=1;Cinnamon=1
+Merchant_5 inventory update: {Nutmeg=3, Clove=0, Cardamom=6, Cinnamon=13}
+Merchant_5 sold {Nutmeg=1, Clove=0, Cardamom=1, Cinnamon=1} => 46 coins (total 254)
+Merchant_3 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_3 -> sell-response: Nutmeg=1;Clove=0;Cardamom=1;Cinnamon=1
+Merchant_3 inventory update: {Nutmeg=6, Clove=0, Cardamom=10, Cinnamon=18}
+Merchant_3 sold {Nutmeg=1, Clove=0, Cardamom=1, Cinnamon=1} => 46 coins (total 254)
+Merchant_4 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_4 -> sell-response: Nutmeg=1;Clove=0;Cardamom=1;Cinnamon=1
+Merchant_4 inventory update: {Nutmeg=6, Clove=0, Cardamom=12, Cinnamon=23}
+Merchant_4 sold {Nutmeg=1, Clove=0, Cardamom=1, Cinnamon=1} => 46 coins (total 174)
+Merchant_1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_1 -> sell-response: Nutmeg=1;Clove=0;Cardamom=1;Cinnamon=1
+Merchant_1 inventory update: {Nutmeg=6, Clove=0, Cardamom=22, Cinnamon=16}
+Merchant_1 sold {Nutmeg=1, Clove=0, Cardamom=1, Cinnamon=1} => 46 coins (total 254)
 
 --- End of Round 3 ---
-Current Scoreboard:
-  player1 has 92 coins.
-  player2 has 93 coins.
-Adjusted prices for next round: {Nutmeg=19, Clove=22, Cardamom=11, Cinnamon=10}
+Scoreboard:
+  Merchant_1: 254
+  Merchant_3: 254
+  Merchant_5: 254
+  Merchant_2: 214
+  Merchant_4: 174
+Prices after Round 3 adjustments: {Nutmeg=31, Clove=14, Cardamom=10, Cinnamon=5}
 
 === Starting Round 4 ===
-gm: Sent 'round-start' message to players.
-player2 received 'round-start'. Re-discovering players and enabling negotiation...
-player1 received 'round-start'. Re-discovering players and enabling negotiation...
-gm: Announcing prices for Round 4 with event: Storm in Indian Ocean: Next round Cardamom price +5
-> Sent price announcement: Nutmeg=19;Clove=22;Cardamom=11;Cinnamon=10;|EVENT:Storm in Indian Ocean: Next round Cardamom price +5
-gm: Requesting sales from players...
-player1 discovered 1 other player(s).
-player1 received price-announcement:
-  Nutmeg=19;Clove=22;Cardamom=11;Cinnamon=10;|EVENT:Storm in Indian Ocean: Next round Cardamom price +5
-player1 received sell-request from gm
-player2 discovered 1 other player(s).
-player2 received price-announcement:
-  Nutmeg=19;Clove=22;Cardamom=11;Cinnamon=10;|EVENT:Storm in Indian Ocean: Next round Cardamom price +5
-player2 received sell-request from gm
-player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 accepted trade with player2: OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 -> sell-response: Nutmeg=0;Clove=0;Cardamom=3;Cinnamon=0
-player1 sold {Nutmeg=0, Clove=0, Cardamom=3, Cinnamon=0} -> earned 33 coins (total 125).
-player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player2 -> player1: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player2 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
-player2 -> sell-response: Nutmeg=0;Clove=0;Cardamom=2;Cinnamon=0
-player2 sold {Nutmeg=0, Clove=0, Cardamom=2, Cinnamon=0} -> earned 22 coins (total 115).
+Bazaar: Sent 'round-start' to players.
+Merchant_2 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_3 received 'round-start'. Re-discovering players and enabling negotiation...
+Bazaar: Announcing event for Round 4 => Storm in Indian Ocean: Next round Cardamom price +8
+Merchant_4 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_5 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_1 received 'round-start'. Re-discovering players and enabling negotiation...
+> Sent price-announcement: Nutmeg=31;Clove=14;Cardamom=10;Cinnamon=5;|EVENT:Storm in Indian Ocean: Next round Cardamom price +8
+Bazaar: Requesting sales...
+Merchant_2 discovered 4 other player(s).
+Merchant_2 received price-announcement:
+  Nutmeg=31;Clove=14;Cardamom=10;Cinnamon=5;|EVENT:Storm in Indian Ocean: Next round Cardamom price +8
+Merchant_2: My naive forecast for next-round prices => {Nutmeg=31, Clove=10, Cardamom=18, Cinnamon=5}
+Merchant_2 received sell-request from Bazaar
+Merchant_3 discovered 4 other player(s).
+Merchant_4 discovered 4 other player(s).
+Merchant_5 discovered 4 other player(s).
+Merchant_3 received price-announcement:
+  Nutmeg=31;Clove=14;Cardamom=10;Cinnamon=5;|EVENT:Storm in Indian Ocean: Next round Cardamom price +8
+Merchant_3: My naive forecast for next-round prices => {Nutmeg=31, Clove=10, Cardamom=18, Cinnamon=5}
+Merchant_5 received price-announcement:
+  Nutmeg=31;Clove=14;Cardamom=10;Cinnamon=5;|EVENT:Storm in Indian Ocean: Next round Cardamom price +8
+Merchant_1 discovered 4 other player(s).
+Merchant_5: My naive forecast for next-round prices => {Nutmeg=31, Clove=10, Cardamom=18, Cinnamon=5}
+Merchant_1 received price-announcement:
+  Nutmeg=31;Clove=14;Cardamom=10;Cinnamon=5;|EVENT:Storm in Indian Ocean: Next round Cardamom price +8
+Merchant_3 received sell-request from Bazaar
+Merchant_5 received sell-request from Bazaar
+Merchant_1: My naive forecast for next-round prices => {Nutmeg=31, Clove=10, Cardamom=18, Cinnamon=5}
+Merchant_4 received price-announcement:
+  Nutmeg=31;Clove=14;Cardamom=10;Cinnamon=5;|EVENT:Storm in Indian Ocean: Next round Cardamom price +8
+Merchant_4: My naive forecast for next-round prices => {Nutmeg=31, Clove=10, Cardamom=18, Cinnamon=5}
+Merchant_1 received sell-request from Bazaar
+Merchant_4 received sell-request from Bazaar
+Merchant_2 proposed an alliance to Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 proposed an alliance to Merchant_5: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 evaluating alliance proposal from Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 evaluating alliance proposal from Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 rejected an alliance with Merchant_2
+Merchant_5 rejected an alliance with Merchant_2
+Merchant_2 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 rejected trade from Merchant_2: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 rejected trade from Merchant_5: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 proposed an alliance to Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 proposed an alliance to Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 evaluating alliance proposal from Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 rejected an alliance with Merchant_4
+Merchant_4 -> Merchant_2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 -> Merchant_5: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 -> Merchant_3: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 rejected trade from Merchant_4: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 proposed an alliance to Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 proposed an alliance to Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 proposed an alliance to Merchant_5: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 evaluating alliance proposal from Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 proposed an alliance to Merchant_3: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 rejected an alliance with Merchant_1
+Merchant_3 evaluating alliance proposal from Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_3 rejected an alliance with Merchant_1
+Merchant_1 -> Merchant_3: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 proposed an alliance to Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_3 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 rejected trade from Merchant_3: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 -> Merchant_2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_2 -> sell-response: Nutmeg=1;Clove=0;Cardamom=0;Cinnamon=1
+Merchant_2 inventory update: {Nutmeg=1, Clove=0, Cardamom=13, Cinnamon=19}
+Merchant_2 sold {Nutmeg=1, Clove=0, Cardamom=0, Cinnamon=1} => 36 coins (total 250)
+Merchant_5 proposed an alliance to Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_5 -> sell-response: Nutmeg=1;Clove=0;Cardamom=0;Cinnamon=1
+Merchant_5 inventory update: {Nutmeg=2, Clove=0, Cardamom=6, Cinnamon=12}
+Merchant_5 sold {Nutmeg=1, Clove=0, Cardamom=0, Cinnamon=1} => 36 coins (total 290)
+Merchant_3 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_3 -> sell-response: Nutmeg=1;Clove=0;Cardamom=0;Cinnamon=1
+Merchant_3 inventory update: {Nutmeg=5, Clove=0, Cardamom=10, Cinnamon=17}
+Merchant_3 sold {Nutmeg=1, Clove=0, Cardamom=0, Cinnamon=1} => 36 coins (total 290)
+Merchant_4 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_4 -> sell-response: Nutmeg=1;Clove=0;Cardamom=0;Cinnamon=1
+Merchant_4 inventory update: {Nutmeg=5, Clove=0, Cardamom=12, Cinnamon=22}
+Merchant_4 sold {Nutmeg=1, Clove=0, Cardamom=0, Cinnamon=1} => 36 coins (total 210)
+Merchant_1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_1 -> sell-response: Nutmeg=1;Clove=0;Cardamom=0;Cinnamon=1
+Merchant_1 inventory update: {Nutmeg=5, Clove=0, Cardamom=22, Cinnamon=15}
+Merchant_1 sold {Nutmeg=1, Clove=0, Cardamom=0, Cinnamon=1} => 36 coins (total 290)
 
 --- End of Round 4 ---
-Current Scoreboard:
-  player1 has 125 coins.
-  player2 has 115 coins.
-Adjusted prices for next round: {Nutmeg=21, Clove=24, Cardamom=16, Cinnamon=12}
+Scoreboard:
+  Merchant_1: 290
+  Merchant_3: 290
+  Merchant_5: 290
+  Merchant_2: 250
+  Merchant_4: 210
+Prices after Round 4 adjustments: {Nutmeg=31, Clove=16, Cardamom=20, Cinnamon=5}
 
 === Starting Round 5 ===
-gm: Sent 'round-start' message to players.
-gm: Announcing prices for Round 5 with event: No special event
-player1 received 'round-start'. Re-discovering players and enabling negotiation...
-player2 received 'round-start'. Re-discovering players and enabling negotiation...
-> Sent price announcement: Nutmeg=21;Clove=24;Cardamom=16;Cinnamon=12;|EVENT:No special event
-gm: Requesting sales from players...
-player1 discovered 1 other player(s).
-player1 received price-announcement:
-  Nutmeg=21;Clove=24;Cardamom=16;Cinnamon=12;|EVENT:No special event
-player1 received sell-request from gm
-player2 discovered 1 other player(s).
-player2 received price-announcement:
-  Nutmeg=21;Clove=24;Cardamom=16;Cinnamon=12;|EVENT:No special event
-player2 received sell-request from gm
-player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player2 accepted trade with player1: OFFER:Cardamom=2 -> REQUEST:Clove=1
-player2 -> sell-response: Nutmeg=0;Clove=0;Cardamom=2;Cinnamon=0
-player2 sold {Nutmeg=0, Clove=0, Cardamom=2, Cinnamon=0} -> earned 32 coins (total 147).
-player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 -> player2: PROPOSE OFFER:Cardamom=2 -> REQUEST:Clove=1
-player1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
-player1 -> sell-response: Nutmeg=0;Clove=0;Cardamom=1;Cinnamon=0
-player1 sold {Nutmeg=0, Clove=0, Cardamom=1, Cinnamon=0} -> earned 16 coins (total 141).
+Bazaar: Sent 'round-start' to players.
+Merchant_2 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_1 received 'round-start'. Re-discovering players and enabling negotiation...
+Bazaar: Announcing event for Round 5 => Sultan's Port Tax of 7% on sales this round
+Merchant_5 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_4 received 'round-start'. Re-discovering players and enabling negotiation...
+> Sent price-announcement: Nutmeg=31;Clove=16;Cardamom=20;Cinnamon=5;|EVENT:Sultan's Port Tax of 7% on sales this round
+Bazaar: Requesting sales...
+Merchant_3 received 'round-start'. Re-discovering players and enabling negotiation...
+Merchant_2 discovered 4 other player(s).
+Merchant_2 received price-announcement:
+  Nutmeg=31;Clove=16;Cardamom=20;Cinnamon=5;|EVENT:Sultan's Port Tax of 7% on sales this round
+Merchant_2: My naive forecast for next-round prices => {Nutmeg=31, Clove=17, Cardamom=25, Cinnamon=5}
+Merchant_2 received sell-request from Bazaar
+Merchant_1 discovered 4 other player(s).
+Merchant_1 received price-announcement:
+  Nutmeg=31;Clove=16;Cardamom=20;Cinnamon=5;|EVENT:Sultan's Port Tax of 7% on sales this round
+Merchant_4 discovered 4 other player(s).
+Merchant_1: My naive forecast for next-round prices => {Nutmeg=31, Clove=17, Cardamom=25, Cinnamon=5}
+Merchant_1 received sell-request from Bazaar
+Merchant_5 discovered 4 other player(s).
+Merchant_5 received price-announcement:
+  Nutmeg=31;Clove=16;Cardamom=20;Cinnamon=5;|EVENT:Sultan's Port Tax of 7% on sales this round
+Merchant_4 received price-announcement:
+  Nutmeg=31;Clove=16;Cardamom=20;Cinnamon=5;|EVENT:Sultan's Port Tax of 7% on sales this round
+Merchant_5: My naive forecast for next-round prices => {Nutmeg=31, Clove=17, Cardamom=25, Cinnamon=5}
+Merchant_3 discovered 4 other player(s).
+Merchant_4: My naive forecast for next-round prices => {Nutmeg=31, Clove=17, Cardamom=25, Cinnamon=5}
+Merchant_5 received sell-request from Bazaar
+Merchant_3 received price-announcement:
+  Nutmeg=31;Clove=16;Cardamom=20;Cinnamon=5;|EVENT:Sultan's Port Tax of 7% on sales this round
+Merchant_4 received sell-request from Bazaar
+Merchant_3: My naive forecast for next-round prices => {Nutmeg=31, Clove=17, Cardamom=25, Cinnamon=5}
+Merchant_3 received sell-request from Bazaar
+Merchant_2 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 rejected trade from Merchant_2: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 -> Merchant_2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 rejected trade from Merchant_3: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 -> Merchant_4: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 proposed an alliance to Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 proposed an alliance to Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 evaluating alliance proposal from Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_4 evaluating alliance proposal from Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 rejected an alliance with Merchant_2
+Merchant_4 rejected an alliance with Merchant_2
+Merchant_2 -> Merchant_3: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 -> Merchant_2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_2 rejected trade from Merchant_5: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 -> Merchant_5: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 proposed an alliance to Merchant_2: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 evaluating alliance proposal from Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_2 formed an alliance with Merchant_4
+Merchant_4 -> Merchant_2: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 -> Merchant_5: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 rejected trade from Merchant_2: OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_5 -> Merchant_4: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_3 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_4 -> Merchant_1: PROPOSE OFFER:Cinnamon=2 -> REQUEST:Nutmeg=1
+Merchant_1 proposed an alliance to Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 proposed an alliance to Merchant_5: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 proposed an alliance to Merchant_3: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 evaluating alliance proposal from Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_3 evaluating alliance proposal from Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_5 rejected an alliance with Merchant_1
+Merchant_3 rejected an alliance with Merchant_1
+Merchant_1 -> Merchant_3: PROPOSE OFFER:Cardamom=2 -> REQUEST:Nutmeg=1
+Merchant_2 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_2 -> sell-response: Nutmeg=1;Clove=0;Cardamom=0;Cinnamon=1
+Merchant_2 inventory update: {Nutmeg=0, Clove=0, Cardamom=13, Cinnamon=18}
+  [Tax] Merchant_2 pays 3 coins in taxes.
+Merchant_2 sold {Nutmeg=1, Clove=0, Cardamom=0, Cinnamon=1} => 33 coins (total 283)
+Merchant_5 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_5 -> sell-response: Nutmeg=1;Clove=0;Cardamom=0;Cinnamon=1
+Merchant_5 inventory update: {Nutmeg=1, Clove=0, Cardamom=6, Cinnamon=11}
+  [Tax] Merchant_5 pays 3 coins in taxes.
+Merchant_5 sold {Nutmeg=1, Clove=0, Cardamom=0, Cinnamon=1} => 33 coins (total 323)
+Merchant_3 proposed an alliance to Merchant_1: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_3 proposed an alliance to Merchant_4: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 evaluating alliance proposal from Merchant_3: Proposing an alliance for mutual benefit. Our inventories complement each other, allowing for more profitable trades.
+Merchant_1 formed an alliance with Merchant_3
+Merchant_3 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_3 -> sell-response: Nutmeg=1;Clove=0;Cardamom=0;Cinnamon=1
+Merchant_3 inventory update: {Nutmeg=4, Clove=0, Cardamom=10, Cinnamon=16}
+  [Tax] Merchant_3 pays 3 coins in taxes.
+Merchant_3 sold {Nutmeg=1, Clove=0, Cardamom=0, Cinnamon=1} => 33 coins (total 323)
+Merchant_4 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_4 -> sell-response: Nutmeg=1;Clove=0;Cardamom=0;Cinnamon=1
+Merchant_4 inventory update: {Nutmeg=4, Clove=0, Cardamom=12, Cinnamon=21}
+  [Tax] Merchant_4 pays 3 coins in taxes.
+Merchant_4 sold {Nutmeg=1, Clove=0, Cardamom=0, Cinnamon=1} => 33 coins (total 243)
+Merchant_1 reached max negotiation attempts without success. Fallback: ending negotiation phase and forcing sell if pending.
+Merchant_1 -> sell-response: Nutmeg=1;Clove=0;Cardamom=0;Cinnamon=1
+Merchant_1 inventory update: {Nutmeg=4, Clove=0, Cardamom=22, Cinnamon=14}
+  [Tax] Merchant_1 pays 3 coins in taxes.
+Merchant_1 sold {Nutmeg=1, Clove=0, Cardamom=0, Cinnamon=1} => 33 coins (total 323)
 
 --- End of Round 5 ---
-Current Scoreboard:
-  player1 has 141 coins.
-  player2 has 147 coins.
-Adjusted prices for next round: {Nutmeg=23, Clove=26, Cardamom=16, Cinnamon=14}
-Reached MAX_ROUNDS. Terminating...
-gm terminating.
+Scoreboard:
+  Merchant_1: 323
+  Merchant_3: 323
+  Merchant_5: 323
+  Merchant_2: 283
+  Merchant_4: 243
+Prices after Round 5 adjustments: {Nutmeg=31, Clove=18, Cardamom=22, Cinnamon=5}
+Reached MAX_ROUNDS = 5. Ending game...
+
+Merchant_1 received 'game-over' from Bazaar with content: The bazaar game has ended. Goodbye!
+
+Merchant_3 received 'game-over' from Bazaar with content: The bazaar game has ended. Goodbye!
+
+Merchant_4 received 'game-over' from Bazaar with content: The bazaar game has ended. Goodbye!
+Bazaar: Sent 'game-over' to remaining players.
+
+Merchant_2 received 'game-over' from Bazaar with content: The bazaar game has ended. Goodbye!
+
+Merchant_5 received 'game-over' from Bazaar with content: The bazaar game has ended. Goodbye!
+Merchant_5 is terminating.
+Merchant_1 is terminating.
+Merchant_2 is terminating.
+Bazaar is terminating.
+Merchant_3 is terminating.
+Merchant_4 is terminating.
+Jan 24, 2025 11:07:04 PM jade.tools.sniffer.WriteLogFileAction doAction
+INFO: Serialized Snapshot File Written.
+Jan 24, 2025 11:08:46 PM jade.domain.RequestManagementBehaviour prepareResponse
+WARNING: Agent ams - Error handling request
+jade.domain.FIPAAgentManagement.InternalError: (internal-error "Agent not found. getContainerID() failed to find agent Merchant_1@172.100.10.1:1099/JADE")
+	at jade.domain.ams.sniffOffAction(ams.java:520)
+	at jade.domain.AMSJadeAgentManagementBehaviour.performAction(AMSJadeAgentManagementBehaviour.java:144)
+	at jade.domain.RequestManagementBehaviour.prepareResponse(RequestManagementBehaviour.java:98)
+	at jade.proto.SimpleAchieveREResponder.action(SimpleAchieveREResponder.java:140)
+	at jade.core.behaviours.Behaviour.actionWrapper(Behaviour.java:344)
+	at jade.core.Agent$ActiveLifeCycle.execute(Agent.java:1651)
+	at jade.core.Agent.run(Agent.java:1590)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
 

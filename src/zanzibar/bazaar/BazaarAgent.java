@@ -57,6 +57,17 @@ public class BazaarAgent extends Agent {
 
     @Override
     protected void setup() {
+    	System.out.println(getLocalName() + " initializing...");
+
+        // Introduce a delay before starting
+        final int START_DELAY = 30000; // 30 seconds in milliseconds
+        try {
+            System.out.println(getLocalName() + ": Delaying start by 30 seconds...");
+            Thread.sleep(START_DELAY);
+        } catch (InterruptedException e) {
+            System.out.println(getLocalName() + ": Interrupted during delay. Starting immediately...");
+        }
+        
         System.out.println(getLocalName() + " starting as Bazaar Agent...");
 
         // 1) Check for a custom maxRounds argument
