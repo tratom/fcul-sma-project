@@ -27,7 +27,7 @@ This repository contains our implementation of the **Zanzibar Bazaar** multi-age
 ## Project Structure
 
 A typical directory layout might look like this:
-
+```
 zanzibar-bazaar/
 ├─ src/
 │   ├─ zanzibar/bazaar/
@@ -36,10 +36,10 @@ zanzibar-bazaar/
 │   │   └─ SimplePlayerAgent.java // Simple merchant agent with minimal logic
 ├─ simulation/
 |   ├─ output.txt // output log
-|   ├─ sniffer_snapshot_file // canva of message exchange, can be opened from the sniffer
+|   ├─ sniffer_snapshot_file.txt // canva of message exchange, can be opened from the sniffer
 |   └─ sniffer_message_list // human readable message exchange list
 └─ README.md // This file
-
+```
 - **`BazaarAgent.java`**: Coordinates rounds, broadcasts events, calculates scores, and applies taxes or price changes.  
 - **`AdvancedPlayerAgent.java`**: A BDI-like agent with inventory tracking, event forecasting, alliances/rivalries, and negotiation.  
 - **`SimplePlayerAgent.java`**: A simpler agent that randomly makes or accepts trade proposals, illustrating minimal strategy.
