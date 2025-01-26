@@ -8,7 +8,6 @@ import jade.lang.acl.MessageTemplate;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAException;
 
 import java.util.*;
@@ -23,7 +22,7 @@ import java.util.*;
  *
  *  - Waits for "round-start" from the GM, sets negotiationOpen = true.
  *  - Has a NegotiationInitiatorBehavior that checks negotiationOpen each tick
- *    and attempts trades up to a fallback.
+ *    and attempts trades up to a fallback, but only to different agents (max 3).
  *  - Has a AllianceProposerBehavior that propose alliances each tick.
  *  - Responds to trade/alliance proposals from other players.
  *  - When the GM requests a sell decision, the agent replies only after
@@ -64,13 +63,10 @@ public class PlayerAgent extends Agent {
      */
     private Map<String, Integer> inventory = new HashMap<>();
 
-    /** Current coins on hand. */
-    private int coins = 0; // Starting coins initialized in setup
+    /** Current coins on hand. (Not heavily used in this example.) */
+    private int coins = 0;
 
-    /** 
-     * For demonstration: we track alliances and rivals. 
-     * Allies are given favorable trades; rivals, unfavorable ones.
-     */
+    /** Allies are given more favorable trades; rivals, more demanding ones. */
     private Set<AID> allies = new HashSet<>();
     private Set<AID> rivals = new HashSet<>();
 
@@ -80,18 +76,9 @@ public class PlayerAgent extends Agent {
     private Set<AID> otherPlayers = new HashSet<>();
 
     // ------------------------------------------------
-    // BDI: Desires (high-level goals)
+    // BDI: Desires (conceptual)
     // ------------------------------------------------
-    /**
-     * Desire: "Maximize short-term profit."
-     * Desire: "Avoid selling spices that will increase in price next round."
-     * Desire: "Capitalize on events that predict higher future prices."
-     * Desire: "Form alliances with players who offer beneficial trades."
-     * Desire: "Harm or mislead rivals if beneficial."
-     *
-     * In code, these are not single variables but guide logic in how
-     * we propose/accept trades and how we decide on final sales.
-     */
+    // (See code logic for how these desires shape trade/sell decisions.)
 
     // ------------------------------------------------
     //  Intentions & Execution Control
@@ -103,8 +90,8 @@ public class PlayerAgent extends Agent {
     private boolean negotiationOpen = false;
 
     /**
-     * Maximum number of attempts to initiate a trade. After these attempts,
-     * if no success, we fallback and end negotiation.
+     * Maximum number of attempts to initiate a trade per round.
+     * We do not send multiple proposals to the same agent in the same round.
      */
     private static final int MAX_NEGOTIATION_ATTEMPTS = 3;
     private int negotiationAttempts = 0;
@@ -115,7 +102,7 @@ public class PlayerAgent extends Agent {
     /** How often we spontaneously propose alliances (ms). */
     private static final long ALLIANCE_INTERVAL = 10000;
 
-    /** Price difference between current price and prediction to make the sell decision */
+    /** Price difference between current price and prediction to make the sell decision. */
     private static final int SELL_DECISION_THRESHOLD = 3;
 
     /**
@@ -124,15 +111,20 @@ public class PlayerAgent extends Agent {
      */
     private ACLMessage pendingSellRequest = null;
 
+    /**
+     * Keep track of which agents we have **already proposed to** in the current round.
+     * We will not re-propose to them if they have accepted or rejected once.
+     */
+    private Set<AID> alreadyProposedThisRound = new HashSet<>();
+
     // ------------------------------------------------
     // Setup / Initialization
     // ------------------------------------------------
     @Override
     protected void setup() {
-    	// Delay for sniffer activation
-    	System.out.println(getLocalName() + " initializing...");
+        System.out.println(getLocalName() + " initializing...");
 
-        // Introduce a delay before starting
+        // Introduce a delay before starting (for debugging / sniffers).
         final int START_DELAY = 30000; // 30 seconds in milliseconds
         try {
             System.out.println(getLocalName() + ": Delaying start by 30 seconds...");
@@ -148,22 +140,18 @@ public class PlayerAgent extends Agent {
 
         // 2) Initialize random inventory
         Random rand = new Random();
-        // Each spice from 1..5 quantity (change as desired)
-        inventory.put(BazaarAgent.CLOVE,    1 + rand.nextInt(5));  // The most valuable and rare of spices, difficult to obtain.
-        inventory.put(BazaarAgent.CINNAMON, 1 + rand.nextInt(30)); // Common, but essential to maintain a steady stream of profits.
-        inventory.put(BazaarAgent.NUTMEG,   1 + rand.nextInt(10)); // Highly valued, especially with the arrival of new European merchants.
-        inventory.put(BazaarAgent.CARDAMOM, 1 + rand.nextInt(25)); // A basic product, but subject to price fluctuations due to its variable demand.
+        inventory.put(BazaarAgent.CLOVE,    1 + rand.nextInt(5));  
+        inventory.put(BazaarAgent.CINNAMON, 1 + rand.nextInt(30));
+        inventory.put(BazaarAgent.NUTMEG,   1 + rand.nextInt(10));
+        inventory.put(BazaarAgent.CARDAMOM, 1 + rand.nextInt(25));
 
-        // 4) Initialize historicalPrices structure so we don’t get NPE.
+        // 3) Initialize historicalPrices structure so we don’t get NPE.
         for (String spice : Arrays.asList(BazaarAgent.CLOVE, BazaarAgent.CINNAMON,
                                           BazaarAgent.NUTMEG, BazaarAgent.CARDAMOM)) {
             historicalPrices.put(spice, new ArrayList<>());
         }
         
-        // 5) Initialize randomize coins from e.g. 30..80
-        // coins = 30 + rand.nextInt(51); TODO: manage wallet to buy spices from other merchant during trades
-
-        // 6) Add Behaviors:
+        // 4) Add Behaviors:
         addBehaviour(new MarketMessageListener());    // GM messages
         addBehaviour(new NegotiationResponder());     // handle trade offers
         addBehaviour(new AllianceResponder());        // handle alliance proposals
@@ -173,7 +161,6 @@ public class PlayerAgent extends Agent {
 
         System.out.println(getLocalName() + " setup complete:");
         System.out.println(getLocalName() + " - initial inventory: " + inventory);
-        // System.out.println(getLocalName() + " - initial coins    : " + coins);
     }
 
     @Override
@@ -230,13 +217,6 @@ public class PlayerAgent extends Agent {
     // ---------------------------------------------------------------------
     //  BDI: Updating Beliefs from the Market (Observing the Market)
     // ---------------------------------------------------------------------
-    /**
-     * In BDI terms, we update our beliefs about:
-     *  - Current event
-     *  - Current prices
-     *  - Historical prices
-     *  whenever we receive a "price-announcement".
-     */
     private void updateHistoricalPrices() {
         // Store to historical record
         for (Map.Entry<String, Integer> entry : currentPrices.entrySet()) {
@@ -246,18 +226,8 @@ public class PlayerAgent extends Agent {
         }
     }
 
-    /**
-     * A simple “predictive” method that tries to forecast next-round prices.
-     * Can be improved with machine learning or more advanced models.
-     * For demonstration, we do a naive approach:
-     *    - If there's a "Storm" on a spice, predict price + X for next round
-     *    - If there's a "New Trade Route" on a spice, predict price * factor for next round
-     *    - Else, extrapolate a small fraction from the last two historical points
-     */
     private void predictNextRoundPrices() {
-    	this.predictedPrices.clear();
-        // We’ll keep track if we have a single “affectedSpice”
-        // so we can skip extrapolating that spice in step (4).
+        this.predictedPrices.clear();
         String spiceImpacted = null; 
                 
         // 1) Start with current price as baseline
@@ -265,16 +235,10 @@ public class PlayerAgent extends Agent {
             predictedPrices.put(entry.getKey(), entry.getValue());
         }
 
-        // 2) If there is a Storm event, parse out spice +X
-        //    Adjust predictions if there's an explicit event
-        //    (the actual effect is also done by BazaarAgent, but we replicate it in beliefs)
+        // 2) Handle specific event patterns: Storm or New Trade Route
         if (currentEvent.contains("Storm in Indian Ocean")) {
-            // e.g. "Storm in Indian Ocean: Next round Cinnamon price +5"
             try {
                 String[] parts = currentEvent.split("Next round")[1].trim().split(" ");
-                // parts[0] = "Cinnamon"
-                // parts[1] = "price"
-                // parts[2] = "+5"
                 spiceImpacted = parts[0];
                 String plusStr = parts[2]; // e.g. "+5"
                 int plusAmount = Integer.parseInt(plusStr.replace("+", ""));
@@ -283,16 +247,9 @@ public class PlayerAgent extends Agent {
             } catch (Exception e) {
                 System.err.println(getLocalName() + ": Error parsing storm event => " + e);
             }
-            
-        // 3) If there is a New Trade Route event, parse spice xFactor
-        //    Adjust predictions if there's an explicit event
-        //    (the actual effect is also done by BazaarAgent, but we replicate it in beliefs)
         } else if (currentEvent.contains("New Trade Route Discovered")) {
-            // e.g. "New Trade Route Discovered: Clove next round price x0.4"
             try {
                 String[] parts = currentEvent.split(":")[1].trim().split(" ");
-                // parts[0] = "Clove"
-                // parts[4] = "x0.4"
                 spiceImpacted = parts[0];
                 String factorStr = parts[4]; // "x0.45"
                 double factor = Double.parseDouble(factorStr.replace("x", ""));
@@ -304,11 +261,8 @@ public class PlayerAgent extends Agent {
             }
         }
 
-        // 4) For all other spices (not the spice impacted from the event9,
-        // if we have at least 2 historical price points, 
-        // we do a naive linear extrapolation to adjust the predicted price
+        // 3) For other spices, do a naive linear extrapolation from the last two data points
         for (String spice : predictedPrices.keySet()) {
-        	// skip the event-affected spice
             if (spice.equals(spiceImpacted)) {
                 continue;
             }
@@ -316,7 +270,7 @@ public class PlayerAgent extends Agent {
             if (hist.size() >= 2) {
                 int last = hist.get(hist.size() - 1);
                 int prev = hist.get(hist.size() - 2);
-                int naiveNext = last + (last - prev) / 2;  // a mild extrapolation
+                int naiveNext = last + (last - prev) / 2;  // mild extrapolation
                 predictedPrices.put(spice, Math.max(1, naiveNext));
             }
         }
@@ -337,8 +291,9 @@ public class PlayerAgent extends Agent {
                                 + " received 'round-start'. Re-discovering players and enabling negotiation...");
                         discoverOtherPlayers();
 
-                        // Reset negotiation attempts
+                        // Reset negotiation attempts and set for new round
                         negotiationAttempts = 0;
+                        alreadyProposedThisRound.clear();  // allow new proposals this round
                         break;
 
                     case "price-announcement":
@@ -378,57 +333,77 @@ public class PlayerAgent extends Agent {
                 return;
             }
 
-            negotiationAttempts++;
-
-            // If we've reached the max attempts with no success, fallback
-            if (negotiationAttempts > MAX_NEGOTIATION_ATTEMPTS) {
+            // If we've reached the max attempts, fallback
+            if (negotiationAttempts >= MAX_NEGOTIATION_ATTEMPTS) {
                 System.out.println(getLocalName()
                         + " reached max negotiation attempts without success. "
                         + "Fallback: ending negotiation phase and forcing sell if pending.");
                 negotiationOpen = false;
-                // If a sell request is pending, respond now
                 if (pendingSellRequest != null) {
                     sendSellResponse();
                 }
                 return;
             }
 
-            // Attempt a trade if we have other players and some inventory
-            if (!otherPlayers.isEmpty() && !inventory.isEmpty()) {
-                AID partner = pickRandomPlayer();
-                // Construct a proposal
-                Map<String, Integer> offered = new HashMap<>();
-                Map<String, Integer> requested = new HashMap<>();
-                decideWhatToOfferAndRequest(offered, requested, partner);
-
-                if (!offered.isEmpty() && !requested.isEmpty()) {
-                    String content = encodeTradeProposal(offered, requested);
-
-                    ACLMessage proposeMsg = new ACLMessage(ACLMessage.PROPOSE);
-                    proposeMsg.setConversationId("trade-offer");
-                    proposeMsg.addReceiver(partner);
-                    proposeMsg.setContent(content);
-                    send(proposeMsg);
-
-                    System.out.println(getLocalName() + " -> " + partner.getLocalName()
-                            + ": PROPOSE " + content);
-                } else {
-                    System.out.println(getLocalName() + ": No valid trade offer to propose at this time.");
-                }
-            } else {
-                System.out.println(getLocalName() + ": Negotiation not possible (no players or no inventory).");
+            // If we have fewer than 3 other players, fallback immediately 
+            // (as per the requirement: "If there are not other 3 agent, run the fallback solution.")
+            if (otherPlayers.size() < 3) {
+                System.out.println(getLocalName() 
+                        + ": Fewer than 3 other players available => fallback / end negotiation now.");
                 negotiationOpen = false;
-                // If a sell request is pending, respond now
                 if (pendingSellRequest != null) {
                     sendSellResponse();
                 }
                 return;
             }
-        }
 
-        private AID pickRandomPlayer() {
-            List<AID> list = new ArrayList<>(otherPlayers);
-            return list.get(new Random().nextInt(list.size()));
+            // Build a list of potential partners we have NOT proposed to this round
+            List<AID> uncontactedPartners = new ArrayList<>();
+            for (AID p : otherPlayers) {
+                if (!alreadyProposedThisRound.contains(p)) {
+                    uncontactedPartners.add(p);
+                }
+            }
+
+            // If no uncontacted partners remain, fallback
+            if (uncontactedPartners.isEmpty()) {
+                System.out.println(getLocalName() 
+                        + ": No uncontacted partners left => fallback / end negotiation.");
+                negotiationOpen = false;
+                if (pendingSellRequest != null) {
+                    sendSellResponse();
+                }
+                return;
+            }
+
+            // Otherwise, pick a random uncontacted partner
+            AID partner = uncontactedPartners.get(new Random().nextInt(uncontactedPartners.size()));
+
+            // Construct a proposal
+            Map<String, Integer> offered = new HashMap<>();
+            Map<String, Integer> requested = new HashMap<>();
+            decideWhatToOfferAndRequest(offered, requested, partner);
+
+            if (!offered.isEmpty() && !requested.isEmpty()) {
+                String content = encodeTradeProposal(offered, requested);
+
+                ACLMessage proposeMsg = new ACLMessage(ACLMessage.PROPOSE);
+                proposeMsg.setConversationId("trade-offer");
+                proposeMsg.addReceiver(partner);
+                proposeMsg.setContent(content);
+                send(proposeMsg);
+
+                System.out.println(getLocalName() + " -> " + partner.getLocalName()
+                        + ": PROPOSE " + content);
+
+                // Mark that we've proposed to this partner this round
+                alreadyProposedThisRound.add(partner);
+
+                // Count as an attempt
+                negotiationAttempts++;
+            } else {
+                System.out.println(getLocalName() + ": No valid trade offer to propose at this time.");
+            }
         }
     }
 
@@ -455,7 +430,6 @@ public class PlayerAgent extends Agent {
                         reply.setContent("Trade accepted!");
                         executeTrade(offered, requested);
 
-                        // Mark that we had a successful negotiation => end negotiation phase
                         System.out.println(getLocalName() + " accepted trade with "
                                 + msg.getSender().getLocalName() + ": " + msg.getContent());
                         onNegotiationSuccess();
@@ -473,9 +447,9 @@ public class PlayerAgent extends Agent {
             }
         }
     }
-    
+
     // ---------------------------------------------------------------------
-    //  Negotiation / Trade Initiation Behavior (Ticker)
+    //  Alliance Proposer Behavior (Ticker)
     // ---------------------------------------------------------------------
     private class AllianceProposerBehavior extends TickerBehaviour {
         public AllianceProposerBehavior(Agent a, long period) {
@@ -488,118 +462,89 @@ public class PlayerAgent extends Agent {
         }
     }
     
-	// ---------------------------------------------------------------------
-	//  Alliance Strategy Expansion
-	// ---------------------------------------------------------------------
-	/**
-	 * Decide whether to propose an alliance and to whom.
-	 * Includes logic for identifying allies based on inventory, goals, and rivals.
-	 */
-	private void considerProposingAlliance() {
-	    // 1) Identify potential allies
-	    for (AID potentialAlly : otherPlayers) {
-	        if (allies.contains(potentialAlly) || rivals.contains(potentialAlly)) {
-	            continue; // Skip if already allied or a known rival
-	        }
-	
-	        boolean sharedRival = hasSharedRival(potentialAlly);
-	        boolean complementaryInventory = hasComplementaryInventory(potentialAlly);
-	
-	        if (sharedRival || complementaryInventory) {
-	            // 2) Craft a tailored alliance proposal
-	            String content = "Proposing an alliance for mutual benefit.";
-	            if (sharedRival) {
-	                content += " We share a common rival, and together we can weaken their market influence.";
-	            }
-	            if (complementaryInventory) {
-	                content += " Our inventories complement each other, allowing for more profitable trades.";
-	
-	                ACLMessage allianceProposal = new ACLMessage(ACLMessage.PROPOSE);
-	                allianceProposal.setConversationId("alliance-offer");
-	                allianceProposal.addReceiver(potentialAlly);
-	                allianceProposal.setContent(content);
-	                send(allianceProposal);
-	
-	                System.out.println(getLocalName() + " proposed an alliance to " + potentialAlly.getLocalName() + ": " + content);
-	            }
-	        }
-	    }
-	}
-	
-	/**
-	 * Evaluate incoming alliance proposals systematically.
-	 * Decide whether to accept or reject based on proposer characteristics and strategy alignment.
-	 */
-	private void evaluateAllianceProposal(AID proposer, String content) {
-	    System.out.println(getLocalName() + " evaluating alliance proposal from " + proposer.getLocalName() + ": " + content);
-	
-	    // Assess proposer’s reliability and inventory
-	    boolean isReliable = checkReliability(proposer);
-	    boolean hasMutualBenefit = sharedGoalsOrComplementaryInventory(proposer);
-	
-	    if (isReliable && hasMutualBenefit) {
-	        // Accept the alliance
-	        ACLMessage reply = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-	        reply.setConversationId("alliance-response");
-	        reply.addReceiver(proposer);
-	        reply.setContent("Alliance accepted!");
-	        send(reply);
-	
-	        allies.add(proposer);
-	        System.out.println(getLocalName() + " formed an alliance with " + proposer.getLocalName());
-	    } else {
-	        // Reject the alliance
-	        ACLMessage reply = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-	        reply.setConversationId("alliance-response");
-	        reply.addReceiver(proposer);
-	        reply.setContent("Alliance rejected due to lack of alignment.");
-	        send(reply);
-	
-	        System.out.println(getLocalName() + " rejected an alliance with " + proposer.getLocalName());
-	    }
-	}
-	
-	/**
-	 * Check if the proposer has complementary inventory.
-	 */
-	private boolean hasComplementaryInventory(AID proposer) {
-	    // Simplified for demonstration: Assume we query their inventory
-	    // In a real system, we’d either observe trades or ask directly
-	    // For now, return true randomly for simplicity
-	    return new Random().nextBoolean();
-	}
-	
-	/**
-	 * Check if the proposer shares a rival with this agent.
-	 */
-	private boolean hasSharedRival(AID proposer) {
-	    for (AID rival : rivals) {
-	        if (rivals.contains(proposer)) {
-	            return true;
-	        }
-	    }
-	    return false;
-	}
-	
-	/**
-	 * Check the reliability of a potential ally based on past interactions.
-	 */
-	private boolean checkReliability(AID proposer) {
-	    // Simplified: Assume we have a record of past trades/interactions
-	    // Return true randomly for demonstration
-	    return new Random().nextBoolean();
-	}
-	
-	/**
-	 * Check if the proposer’s goals align with this agent’s strategy.
-	 */
-	private boolean sharedGoalsOrComplementaryInventory(AID proposer) {
-	    return hasSharedRival(proposer) || hasComplementaryInventory(proposer);
-	}
-    
     // ---------------------------------------------------------------------
-    //  Alliances: Responder to alliance proposals (Cyclic)
+    //  Alliances
     // ---------------------------------------------------------------------
+    private void considerProposingAlliance() {
+        // 1) Identify potential allies
+        for (AID potentialAlly : otherPlayers) {
+            if (allies.contains(potentialAlly) || rivals.contains(potentialAlly)) {
+                continue;
+            }
+            boolean sharedRival = hasSharedRival(potentialAlly);
+            boolean complementaryInventory = hasComplementaryInventory(potentialAlly);
+
+            if (sharedRival || complementaryInventory) {
+                // 2) Craft an alliance proposal
+                String content = "Proposing an alliance for mutual benefit.";
+                if (sharedRival) {
+                    content += " We share a common rival, and together we can weaken their market influence.";
+                }
+                if (complementaryInventory) {
+                    content += " Our inventories complement each other, enabling more profitable trades.";
+                }
+
+                ACLMessage allianceProposal = new ACLMessage(ACLMessage.PROPOSE);
+                allianceProposal.setConversationId("alliance-offer");
+                allianceProposal.addReceiver(potentialAlly);
+                allianceProposal.setContent(content);
+                send(allianceProposal);
+
+                System.out.println(getLocalName() + " proposed an alliance to " + potentialAlly.getLocalName() + ": " + content);
+            }
+        }
+    }
+
+    private void evaluateAllianceProposal(AID proposer, String content) {
+        System.out.println(getLocalName() + " evaluating alliance proposal from " + proposer.getLocalName() + ": " + content);
+        boolean isReliable = checkReliability(proposer);
+        boolean hasMutualBenefit = sharedGoalsOrComplementaryInventory(proposer);
+
+        if (isReliable && hasMutualBenefit) {
+            // Accept
+            ACLMessage reply = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+            reply.setConversationId("alliance-response");
+            reply.addReceiver(proposer);
+            reply.setContent("Alliance accepted!");
+            send(reply);
+
+            allies.add(proposer);
+            System.out.println(getLocalName() + " formed an alliance with " + proposer.getLocalName());
+        } else {
+            // Reject
+            ACLMessage reply = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+            reply.setConversationId("alliance-response");
+            reply.addReceiver(proposer);
+            reply.setContent("Alliance rejected due to lack of alignment.");
+            send(reply);
+
+            System.out.println(getLocalName() + " rejected an alliance with " + proposer.getLocalName());
+        }
+    }
+
+    private boolean hasComplementaryInventory(AID proposer) {
+        // Stub logic; randomly returns true/false for demonstration
+        return new Random().nextBoolean();
+    }
+
+    private boolean hasSharedRival(AID proposer) {
+        for (AID rival : rivals) {
+            if (rivals.contains(proposer)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkReliability(AID proposer) {
+        // Stub logic; randomly returns true/false for demonstration
+        return new Random().nextBoolean();
+    }
+
+    private boolean sharedGoalsOrComplementaryInventory(AID proposer) {
+        return hasSharedRival(proposer) || hasComplementaryInventory(proposer);
+    }
+
     private class AllianceResponder extends CyclicBehaviour {
         @Override
         public void action() {
@@ -648,21 +593,15 @@ public class PlayerAgent extends Agent {
     // ---------------------------------------------------------------------
     private void handlePriceAnnouncement(ACLMessage msg) {
         System.out.println(getLocalName() + " received price-announcement:\n  " + msg.getContent());
-        // Decode the new prices + event
         decodePriceEventInfo(msg.getContent());
-        // Here we update our BDI beliefs
         updateHistoricalPrices();
-
-        // Do an early “desire formation” or “prediction” step
-        // storing the results in a class variable to guide decisions.
         predictNextRoundPrices();
-        // Print it for demonstration
         System.out.println(getLocalName() + ": My naive forecast for next-round prices => " + predictedPrices);
     }
 
     private void handleSellRequest(ACLMessage msg) {
         System.out.println(getLocalName() + " received sell-request from " + msg.getSender().getLocalName());
-        // Store this message until we either succeed in a negotiation or we fallback
+        // Store the request until we either succeed or fallback
         pendingSellRequest = msg;
 
         // If negotiation is already closed (either success or fallback),
@@ -676,30 +615,21 @@ public class PlayerAgent extends Agent {
         System.out.println("\n" + getLocalName() + " received 'game-over' from "
                            + msg.getSender().getLocalName()
                            + " with content: " + msg.getContent());
-        // Terminate this agent
-        doDelete();
+        doDelete(); // Terminate
     }
 
     // ---------------------------------------------------------------------
-    //  BDI: Decision-Making (After Negotiations) -> Sell Strategy
+    //  Negotiation outcome => Sell strategy
     // ---------------------------------------------------------------------
-    /**
-     * Called when a negotiation is successful (trade accepted).
-     * We close negotiation and if we have a pending sell-request, we respond now.
-     */
     private void onNegotiationSuccess() {
         negotiationOpen = false;
-        // If we have a pending sell request, respond
         if (pendingSellRequest != null) {
             sendSellResponse();
         }
     }
 
-    /**
-     * Build and send the sell response. Then reset round-based states if needed.
-     */
     private void sendSellResponse() {
-        // We apply our BDI-based “selling strategy”:
+        // Build the sell decision
         Map<String, Integer> sellDecision = decideSales(currentPrices, inventory, currentEvent);
         String sellContent = encodeSellInfo(sellDecision);
 
@@ -711,59 +641,51 @@ public class PlayerAgent extends Agent {
 
         System.out.println(getLocalName() + " -> sell-response: " + sellContent);
 
-        // Update local inventory (remove what we sold)
+        // Update local inventory
         updateLocalInventory(sellDecision);
 
         // Clear out the pending request for next round
         pendingSellRequest = null;
     }
 
-    /**
-     * BDI-inspired selling logic:
-     *  - If an upcoming Storm on Spice X is forecast to raise its price, hold it.
-     *  - If a new trade route will reduce next price for Spice Y, sell now.
-     *  - Otherwise, if price is already good (>= 10), sell half to secure profit.
-     *  - (Adapt as you wish for more advanced logic)
-     */
     private Map<String, Integer> decideSales(
             Map<String, Integer> prices,
             Map<String, Integer> myInventory,
             String eventDesc)
     {
-
         Map<String, Integer> decision = new HashMap<>();
         for (String spice : myInventory.keySet()) {
             int quantity = myInventory.getOrDefault(spice, 0);
             int currentPrice = prices.getOrDefault(spice, 0);
             int predictedNext = predictedPrices.getOrDefault(spice, currentPrice);
 
-            // Check if next round is likely higher => hold
+            // If next round is likely higher => hold
             if (predictedNext > currentPrice + SELL_DECISION_THRESHOLD) {
                 decision.put(spice, 0);
             }
-            // If next round is likely lower => dump now
+            // If next round is likely lower => sell all
             else if (predictedNext < currentPrice - SELL_DECISION_THRESHOLD) {
                 decision.put(spice, quantity);
             }
-            // If about the same or no strong difference, compare to historical average
+            // Otherwise, partial sell logic
             else {
                 List<Integer> history = historicalPrices.getOrDefault(spice, new ArrayList<>());
-                double averagePrice = history.isEmpty() ? 10 : history.stream().mapToInt(Integer::intValue).average().orElse(10);
-                
+                double averagePrice = history.isEmpty() 
+                    ? 10 
+                    : history.stream().mapToInt(Integer::intValue).average().orElse(10);
+
                 if (currentPrice >= averagePrice) {
-                    // Sell the half
-                    decision.put(spice, Math.min(1, predictedNext / 3));
+                    // Sell half as a simplistic approach
+                    decision.put(spice, quantity / 2);
                 } else {
-                    // Keep it
+                    // Keep
                     decision.put(spice, 0);
                 }
             }
         }
-
         return decision;
     }
 
-    /** Remove sold items from local inventory. */
     private void updateLocalInventory(Map<String, Integer> sellDecision) {
         for (Map.Entry<String, Integer> entry : sellDecision.entrySet()) {
             String spice = entry.getKey();
@@ -778,36 +700,23 @@ public class PlayerAgent extends Agent {
     // ---------------------------------------------------------------------
     //  BDI: Trade Decision Logic
     // ---------------------------------------------------------------------
-    /**
-     * Decide what to offer vs. what we request in a trade proposal.
-     * Possibly factor in alliances or rivalries for ratio changes.
-     *
-     * In a BDI sense, we are forming an "intention" to get rid of spices we
-     * believe will drop in price, while acquiring those we believe will rise.
-     */
     private void decideWhatToOfferAndRequest(
             Map<String, Integer> offered,
             Map<String, Integer> requested,
             AID partner)
     {
-    	
-        // Example:
-        // 1) Identify a spice in our inventory we *predict will drop* next round
-        // 2) Identify a spice we *predict will rise* next round
-        // Then propose a ratio depending on alliance or rivalry.
-
+        // Example strategy:
         String spiceToDrop = null;
         String spiceToHold = null;
         int biggestDrop = 0;
         int biggestRise = 0;
 
-        // Find the spice with the largest negative (predicted - current)
-        // and the largest positive (predicted - current).
+        // Find spice with largest negative diff (predicted - current) => toDrop
+        // and largest positive diff => toHold
         for (String spice : currentPrices.keySet()) {
             int now = currentPrices.get(spice);
-            int next = predictedPrices.get(spice);
-
-            int diff = next - now; // negative => price drop, positive => price rise
+            int next = predictedPrices.getOrDefault(spice, now);
+            int diff = next - now; 
             if (diff < biggestDrop) {
                 biggestDrop = diff;
                 spiceToDrop = spice;
@@ -818,14 +727,13 @@ public class PlayerAgent extends Agent {
             }
         }
 
-        // If we can’t find any meaningful difference, fallback to original logic:
         if (spiceToDrop == null || spiceToHold == null || spiceToDrop.equals(spiceToHold)) {
-            // fallback to a simpler approach:
+            // fallback
             basicTradeLogic(offered, requested, partner);
             return;
         }
 
-        // Decide quantity:
+        // Decide quantity
         int availableToOffer = inventory.getOrDefault(spiceToDrop, 0);
         if (availableToOffer <= 0) {
             // fallback
@@ -833,13 +741,12 @@ public class PlayerAgent extends Agent {
             return;
         }
 
-        // Propose to trade up to 4 units of the "drop" spice
+        // Propose up to 2-4 units
         Random rand = new Random();
         int toOffer = Math.min(2 + rand.nextInt(2), availableToOffer);
         offered.put(spiceToDrop, toOffer);
 
-        // Decide how many to request of the "rising" spice
-        // Allies get more favorable ratio, rivals more demanding
+        // Allies get more favorable ratio, rivals get strict ratio, etc.
         if (allies.contains(partner)) {
             requested.put(spiceToHold, Math.max(1, (int)Math.ceil(toOffer / 2.0)));
         }
@@ -848,13 +755,9 @@ public class PlayerAgent extends Agent {
         }
         else {
             requested.put(spiceToHold, (int)Math.ceil(toOffer * 0.75));
-        }    	
+        }
     }
 
-    /**
-     * A fallback method that picks the spice we have the most of (offer)
-     * and the highest-priced spice in the market (request).
-     */
     private void basicTradeLogic(
             Map<String, Integer> offered,
             Map<String, Integer> requested,
@@ -884,7 +787,6 @@ public class PlayerAgent extends Agent {
             int toOffer = Math.min(2, inventory.get(maxSpice));
 
             if (toOffer > 0) {
-                // Allies get more favorable ratio
                 if (allies.contains(partner)) {
                     offered.put(maxSpice, toOffer);
                     requested.put(highPriceSpice, 1);
@@ -899,12 +801,6 @@ public class PlayerAgent extends Agent {
         }
     }
 
-    /**
-     * Check if the trade is acceptable:
-     *  1) We have enough inventory to give what is requested.
-     *  2) Compare approximate "value" from currentPrices.
-     *  3) Adjust acceptance threshold for allies or rivals.
-     */
     private boolean isTradeAcceptable(Map<String, Integer> offered,
                                       Map<String, Integer> requested,
                                       AID proposer)
@@ -919,7 +815,7 @@ public class PlayerAgent extends Agent {
             }
         }
 
-        // 2) Sum up approximate value
+        // 2) Compare approximate "value" using currentPrices
         int valueOffered = 0;
         for (Map.Entry<String, Integer> off : offered.entrySet()) {
             String spice = off.getKey();
@@ -935,34 +831,27 @@ public class PlayerAgent extends Agent {
             valueRequested += (qty * price);
         }
 
-        // 3) Allies might accept slightly unfavorable deals
+        // Allies accept if offered >= 80% 
         if (allies.contains(proposer)) {
-            // Accept if offered >= 80% of requested
             return (valueOffered >= valueRequested * 0.8);
         }
-        // Rivals might require strictly better deals
+        // Rivals need 120%
         if (rivals.contains(proposer)) {
-            // Accept if offered >= 120% of requested
             return (valueOffered >= valueRequested * 1.2);
         }
-        // Otherwise, standard check
+        // Others => must be >=
         return (valueOffered >= valueRequested);
     }
 
-    /**
-     * Apply the trade in our local inventory:
-     *  - We GAIN what was offered
-     *  - We LOSE what we requested
-     */
     private void executeTrade(Map<String, Integer> offered, Map<String, Integer> requested) {
-        // Add offered to our inventory
+        // We gain what was offered:
         for (Map.Entry<String, Integer> off : offered.entrySet()) {
             String spice = off.getKey();
             int qty = off.getValue();
             int current = inventory.getOrDefault(spice, 0);
             inventory.put(spice, current + qty);
         }
-        // Remove requested from our inventory
+        // We lose what was requested:
         for (Map.Entry<String, Integer> req : requested.entrySet()) {
             String spice = req.getKey();
             int qty = req.getValue();
@@ -972,7 +861,7 @@ public class PlayerAgent extends Agent {
     }
 
     // ---------------------------------------------------------------------
-    //  Utility: Encode / Decode and minor methods
+    //  Utility: Encode / Decode
     // ---------------------------------------------------------------------
     private String encodeTradeProposal(Map<String, Integer> offered, Map<String, Integer> requested) {
         // "OFFER:spiceA=2;spiceB=1 -> REQUEST:spiceC=1;spiceD=2"
@@ -1034,9 +923,6 @@ public class PlayerAgent extends Agent {
         return sb.toString();
     }
 
-    /**
-     * E.g. "Clove=20;Cinnamon=10;Nutmeg=15;Cardamom=5|EVENT:Storm in Indian Ocean..."
-     */
     private void decodePriceEventInfo(String content) {
         String[] mainParts = content.split("\\|EVENT:");
         if (mainParts.length > 0) {
