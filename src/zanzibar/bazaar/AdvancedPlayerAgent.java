@@ -28,7 +28,7 @@ import java.util.*;
  *  - When the GM requests a sell decision, the agent replies only after
  *    at least one negotiation has succeeded or the fallback is triggered.
  */
-public class PlayerAgent extends Agent {
+public class AdvancedPlayerAgent extends Agent {
 
     // ------------------------------------------------
     // BDI: Beliefs

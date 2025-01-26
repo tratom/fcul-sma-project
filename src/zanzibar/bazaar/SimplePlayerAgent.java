@@ -15,7 +15,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-public class MerchantAgent extends Agent {
+public class SimplePlayerAgent extends Agent {
 
 	private HashMap<String, Integer> inventory = new HashMap<>();
 	private HashMap<String, Integer> currentPrices = new HashMap<>();
