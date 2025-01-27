@@ -29,15 +29,19 @@ This repository contains our implementation of the **Zanzibar Bazaar** multi-age
 A typical directory layout might look like this:
 ```
 zanzibar-bazaar/
+├─ docs/
+|   ├─ Project_Presentation.pdf // slides
+|   └─ Project_Report.pdf // final report
+├─ simulation/
+|   ├─ output.txt // output log
+|   ├─ screen_record.mkv // video capture of the running simulation
+|   ├─ sniffer_snapshot_file.txt // canva of message exchange, can be opened from the sniffer
+|   └─ sniffer_message_list // human readable message exchange list
 ├─ src/
 │   ├─ zanzibar/bazaar/
 │   │   ├─ BazaarAgent.java // The Game Master agent
 │   │   ├─ AdvancedPlayerAgent.java // BDI-like merchant agent
 │   │   └─ SimplePlayerAgent.java // Simple merchant agent with minimal logic
-├─ simulation/
-|   ├─ output.txt // output log
-|   ├─ sniffer_snapshot_file.txt // canva of message exchange, can be opened from the sniffer
-|   └─ sniffer_message_list // human readable message exchange list
 └─ README.md // This file
 ```
 - **`BazaarAgent.java`**: Coordinates rounds, broadcasts events, calculates scores, and applies taxes or price changes.  
